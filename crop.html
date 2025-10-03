@@ -1,41 +1,82 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>قص الصور</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f8f9fa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    #canvas {
+      border: 1px solid #ccc;
+      margin-top: 10px;
+      max-width: 100%;
+    }
+    input {
+      margin-top: 15px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      border: none;
+      background: #007bff;
+      color: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>قص الصور</h1>
+  <input type="file" id="upload" accept="image/*">
+  <canvas id="canvas"></canvas>
+  <br>
+  <button id="cropBtn">قص</button>
+  <script>
+    const upload = document.getElementById('upload');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let img = new Image();
 
-  <url>
-    <loc>https://anaskabo263-ctrl.github.io/photo-editor-site/</loc>
-    <lastmod>2025-10-03</lastmod>
-    <priority>1.0</priority>
-  </url>
+    upload.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
 
-  <url>
-    <loc>https://anaskabo263-ctrl.github.io/photo-editor-site/resize.html</loc>
-    <lastmod>2025-10-03</lastmod>
-    <priority>0.9</priority>
-  </url>
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+    };
 
-  <url>
-    <loc>https://anaskabo263-ctrl.github.io/photo-editor-site/crop.html</loc>
-    <lastmod>2025-10-03</lastmod>
-    <priority>0.9</priority>
-  </url>
+    document.getElementById('cropBtn').addEventListener('click', () => {
+      // هنا مثال لقص جزء (ربع الصورة الأول فقط)
+      const cropWidth = img.width / 2;
+      const cropHeight = img.height / 2;
+      const imageData = ctx.getImageData(0, 0, cropWidth, cropHeight);
 
-  <url>
-    <loc>https://anaskabo263-ctrl.github.io/photo-editor-site/convert.html</loc>
-    <lastmod>2025-10-03</lastmod>
-    <priority>0.9</priority>
-  </url>
-
-  <url>
-    <loc>https://anaskabo263-ctrl.github.io/photo-editor-site/features.html</loc>
-    <lastmod>2025-10-03</lastmod>
-    <priority>0.7</priority>
-  </url>
-
-  <url>
-    <loc>https://anaskabo263-ctrl.github.io/photo-editor-site/privacy.html</loc>
-    <lastmod>2025-10-03</lastmod>
-    <priority>0.5</priority>
-  </url>
-
-</urlset>
+      canvas.width = cropWidth;
+      canvas.height = cropHeight;
+      ctx.putImageData(imageData, 0, 0);
+    });
+  </script>
+</body>
+</html>
 
