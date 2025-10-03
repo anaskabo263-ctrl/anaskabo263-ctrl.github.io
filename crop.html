@@ -5,81 +5,118 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>قص الصور</title>
 
-  <!-- AdSense Verification -->
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-CECGX11WVH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-CECGX11WVH');
+  </script>
+
+  <!-- AdSense -->
   <meta name="google-adsense-account" content="ca-pub-9629738997503614">
 
+  <!-- Cropper.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
   <style>
-    body {
-      font-family: sans-serif;
-      background: #f8f9fa;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-    }
-    h1 {
-      color: #333;
-    }
-    #canvas {
-      border: 1px solid #ccc;
-      margin-top: 10px;
-      max-width: 100%;
-    }
-    input {
-      margin-top: 15px;
-    }
-    button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      border: none;
-      background: #007bff;
-      color: #fff;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #0056b3;
-    }
+    body{margin:0;font-family:sans-serif;background:#f8f9fa;direction:rtl;color:#333}
+    header{background:#007bff;color:#fff;padding:14px;text-align:center;font-size:1.3rem}
+    .container{max-width:980px;margin:18px auto;background:#fff;padding:14px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+    .info{background:#f1f9ff;border:1px solid #cce5ff;padding:12px;border-radius:8px;margin-bottom:12px}
+    .buttons{text-align:center;margin:12px 0}
+    .btn{background:#007bff;color:#fff;padding:10px 14px;border:none;border-radius:8px;cursor:pointer;margin:6px}
+    .btn:disabled{background:#ccc;cursor:not-allowed}
+    .img-container{text-align:center;margin-top:10px}
+    img#image{max-width:100%;display:block;margin:0 auto;max-height:520px;border-radius:8px}
+    .links{margin-top:18px;text-align:center}
+    .links a{display:inline-block;margin:6px;padding:8px 12px;border:1px solid #007bff;color:#007bff;border-radius:8px;text-decoration:none}
+    .links a:hover{background:#007bff;color:#fff}
+    footer{text-align:center;padding:12px;color:#666;margin-top:12px}
   </style>
 </head>
 <body>
-  <h1>قص الصور</h1>
-  <input type="file" id="upload" accept="image/*">
-  <canvas id="canvas"></canvas>
-  <br>
-  <button id="cropBtn">قص</button>
-  <script>
-    const upload = document.getElementById('upload');
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    let img = new Image();
+<header>✂️ أداة قص الصور</header>
 
-    upload.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        img.src = reader.result;
-      };
-      reader.readAsDataURL(file);
-    });
+<div class="container">
+  <div class="info">
+    <strong>طريقة الاستخدام:</strong>
+    <ol style="margin:6px 0;padding-inline-start:18px">
+      <li>اضغط "اختر صورة" لتحميل صورة من جهازك.</li>
+      <li>اضبط إطار القص على الصورة كما تريد.</li>
+      <li>اضغط "قص وتحميل" لحفظ النتيجة.</li>
+    </ol>
+  </div>
 
-    img.onload = () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
+  <div class="buttons">
+    <label class="btn" for="fileInput">📁 اختر صورة</label>
+    <input id="fileInput" type="file" accept="image/*" style="display:none">
+    <button id="cropBtn" class="btn" disabled>📥 قص وتحميل</button>
+  </div>
+
+  <div class="img-container">
+    <img id="image" src="" alt="قم بتحميل صورة للقص">
+  </div>
+
+  <div class="links">
+    <a href="./index.html">🏠 الرئيسية</a>
+    <a href="./resize.html">📐 تعديل الأبعاد</a>
+    <a href="./convert.html">🔄 تحويل صيغة</a>
+    <a href="./features.html">⭐ مميزات</a>
+    <a href="./privacy.html">🔒 سياسة الخصوصية</a>
+  </div>
+</div>
+
+<footer>© 2025 جميع الحقوق محفوظة</footer>
+
+<script>
+  const fileInput = document.getElementById('fileInput');
+  const cropBtn = document.getElementById('cropBtn');
+  const image = document.getElementById('image');
+  let cropper;
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    if(!file.type.startsWith('image/')) { alert('اختر ملف صورة فقط'); return; }
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      image.src = ev.target.result;
+      if(cropper) cropper.destroy();
+      cropper = new Cropper(image, {
+        aspectRatio: NaN,
+        viewMode: 1,
+        movable: true,
+        zoomable: true,
+        scalable: true,
+        rotatable: true,
+      });
+      cropBtn.disabled = false;
     };
+    reader.readAsDataURL(file);
+  });
 
-    document.getElementById('cropBtn').addEventListener('click', () => {
-      // هنا مثال لقص جزء (ربع الصورة الأول فقط)
-      const cropWidth = img.width / 2;
-      const cropHeight = img.height / 2;
-      const imageData = ctx.getImageData(0, 0, cropWidth, cropHeight);
+  cropBtn.addEventListener('click', ()=>{
+    if(!cropper) return alert('اختر صورة أولاً');
+    const croppedCanvas = cropper.getCroppedCanvas({ maxWidth:4096, maxHeight:4096 });
+    if(!croppedCanvas) return alert('فشل القص');
 
-      canvas.width = cropWidth;
-      canvas.height = cropHeight;
-      ctx.putImageData(imageData, 0, 0);
+    croppedCanvas.toBlob((blob)=>{
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'cropped-image.png';
+      document.body.appendChild(link);
+      link.click();
+      URL.revokeObjectURL(link.href);
+      link.remove();
     });
-  </script>
+  });
+
+  // منع السحب الافتراضي على الصفحة
+  ['dragenter','dragover','dragleave','drop'].forEach(evt=>window.addEventListener(evt,e=>e.preventDefault()));
+</script>
 </body>
 </html>
