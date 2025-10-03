@@ -22,7 +22,7 @@
     .links{margin-top:14px;text-align:center}
     a.nav{display:inline-block;margin:6px;padding:8px 12px;border:1px solid #0b5cff;color:#0b5cff;border-radius:8px;text-decoration:none}
     .small{font-size:13px;color:#666;margin-top:8px;text-align:center}
-    footer{text-align:center;padding:12px;margin-top:18px;color:#666}
+    footer{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;color:#666;font-size:14px;margin-top:18px;}
     @media(max-width:620px){.controls{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}}
   </style>
 </head>
@@ -80,102 +80,104 @@
     </div>
   </div>
 
-  <footer>© 2025 جميع الحقوق محفوظة</footer>
+  <footer>
+    <span>© 2025 جميع الحقوق محفوظة</span>
+    <span>|</span>
+    <a href="./privacy.html" style="color:#0b5cff;text-decoration:none;">سياسة الخصوصية</a>
+  </footer>
 
-<canvas id="canvas" style="display:none"></canvas>
-<script>
-  const dropZone = document.getElementById('dropZone');
-  const fileInput = document.getElementById('fileInput');
-  const preview = document.getElementById('preview');
-  const widthInput = document.getElementById('widthInput');
-  const heightInput = document.getElementById('heightInput');
-  const keepAspect = document.getElementById('keepAspect');
-  const formatSelect = document.getElementById('formatSelect');
-  const qualityRange = document.getElementById('qualityRange');
-  const qualityLabel = document.getElementById('qualityLabel');
-  const downloadBtn = document.getElementById('downloadBtn');
-  const resetBtn = document.getElementById('resetBtn');
-  const originalSize = document.getElementById('originalSize');
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
+  <canvas id="canvas" style="display:none"></canvas>
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const widthInput = document.getElementById('widthInput');
+    const heightInput = document.getElementById('heightInput');
+    const keepAspect = document.getElementById('keepAspect');
+    const formatSelect = document.getElementById('formatSelect');
+    const qualityRange = document.getElementById('qualityRange');
+    const qualityLabel = document.getElementById('qualityLabel');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const originalSize = document.getElementById('originalSize');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
 
-  let img = new Image();
-  let aspectRatio = 1;
-  let originalName = 'image';
+    let img = new Image();
+    let aspectRatio = 1;
+    let originalName = 'image';
 
-  dropZone.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', (e) => { if(e.target.files[0]) loadImage(e.target.files[0]); });
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => { if(e.target.files[0]) loadImage(e.target.files[0]); });
 
-  ['dragenter','dragover'].forEach(ev=>dropZone.addEventListener(ev,(e)=>{e.preventDefault();dropZone.classList.add('drag')}));
-  ['dragleave','drop'].forEach(ev=>dropZone.addEventListener(ev,(e)=>{e.preventDefault();dropZone.classList.remove('drag')}));
-  dropZone.addEventListener('drop',(e)=>{ if(e.dataTransfer.files[0]) loadImage(e.dataTransfer.files[0]); });
+    ['dragenter','dragover'].forEach(ev=>dropZone.addEventListener(ev,(e)=>{e.preventDefault();dropZone.classList.add('drag')}));
+    ['dragleave','drop'].forEach(ev=>dropZone.addEventListener(ev,(e)=>{e.preventDefault();dropZone.classList.remove('drag')}));
+    dropZone.addEventListener('drop',(e)=>{ if(e.dataTransfer.files[0]) loadImage(e.dataTransfer.files[0]); });
 
-  function loadImage(file){
-    if(!file.type.startsWith('image/')){ alert('اختر ملف صورة فقط'); return; }
-    originalName = file.name.replace(/\.[^/.]+$/, "");
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      img = new Image();
-      img.onload = () => {
-        aspectRatio = img.width / img.height;
-        widthInput.value = img.width;
-        heightInput.value = img.height;
-        preview.innerHTML = '';
-        img.style.maxWidth = '100%';
-        img.style.borderRadius = '8px';
-        preview.appendChild(img);
-        originalSize.textContent = `الأبعاد الأصلية: ${img.width} × ${img.height}`;
-        downloadBtn.disabled = false;
+    function loadImage(file){
+      if(!file.type.startsWith('image/')){ alert('اختر ملف صورة فقط'); return; }
+      originalName = file.name.replace(/\.[^/.]+$/, "");
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        img = new Image();
+        img.onload = () => {
+          aspectRatio = img.width / img.height;
+          widthInput.value = img.width;
+          heightInput.value = img.height;
+          preview.innerHTML = '';
+          img.style.maxWidth = '100%';
+          img.style.borderRadius = '8px';
+          preview.appendChild(img);
+          originalSize.textContent = `الأبعاد الأصلية: ${img.width} × ${img.height}`;
+          downloadBtn.disabled = false;
+        };
+        img.src = ev.target.result;
       };
-      img.src = ev.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
+      reader.readAsDataURL(file);
+    }
 
-  widthInput.addEventListener('input', () => {
-    if (keepAspect.checked && img && img.width) heightInput.value = Math.round(widthInput.value / aspectRatio);
-  });
-  heightInput.addEventListener('input', () => {
-    if (keepAspect.checked && img && img.height) widthInput.value = Math.round(heightInput.value * aspectRatio);
-  });
+    widthInput.addEventListener('input', () => {
+      if (keepAspect.checked && img && img.width) heightInput.value = Math.round(widthInput.value / aspectRatio);
+    });
+    heightInput.addEventListener('input', () => {
+      if (keepAspect.checked && img && img.height) widthInput.value = Math.round(heightInput.value * aspectRatio);
+    });
 
-  qualityRange.addEventListener('input', () => { qualityLabel.textContent = Math.round(qualityRange.value * 100) + '%'; });
+    qualityRange.addEventListener('input', () => { qualityLabel.textContent = Math.round(qualityRange.value * 100) + '%'; });
 
-  downloadBtn.addEventListener('click', () => {
-    if(!img.src) return alert('اختر صورة أولاً');
-    const w = Math.max(1, parseInt(widthInput.value));
-    const h = Math.max(1, parseInt(heightInput.value));
-    const mime = formatSelect.value;
-    const q = parseFloat(qualityRange.value);
+    downloadBtn.addEventListener('click', () => {
+      if(!img.src) return alert('اختر صورة أولاً');
+      const w = Math.max(1, parseInt(widthInput.value));
+      const h = Math.max(1, parseInt(heightInput.value));
+      const mime = formatSelect.value;
+      const q = parseFloat(qualityRange.value);
 
-    canvas.width = w; canvas.height = h;
-    ctx.clearRect(0,0,w,h);
-    ctx.drawImage(img,0,0,w,h);
+      canvas.width = w; canvas.height = h;
+      ctx.clearRect(0,0,w,h);
+      ctx.drawImage(img,0,0,w,h);
 
-    canvas.toBlob((blob) => {
-      if(!blob){ alert('فشل في إنشاء الصورة'); return; }
-      const ext = mime.split('/')[1].replace('jpeg','jpg');
-      const name = `${originalName || 'image'}-resized.${ext}`;
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = name;
-      document.body.appendChild(a);
-      a.click();
-      URL.revokeObjectURL(a.href);
-      a.remove();
-    }, mime, q);
-  });
+      canvas.toBlob((blob) => {
+        if(!blob){ alert('فشل في إنشاء الصورة'); return; }
+        const ext = mime.split('/')[1].replace('jpeg','jpg');
+        const name = `${originalName || 'image'}-resized.${ext}`;
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        URL.revokeObjectURL(a.href);
+        a.remove();
+      }, mime, q);
+    });
 
-  resetBtn.addEventListener('click', () => {
-    preview.innerHTML = ''; fileInput.value = ''; originalSize.textContent = ''; downloadBtn.disabled = true;
-    widthInput.value = 800; heightInput.value = 600; qualityRange.value = 0.9; qualityLabel.textContent='90%';
-  });
+    resetBtn.addEventListener('click', () => {
+      preview.innerHTML = ''; fileInput.value = ''; originalSize.textContent = ''; downloadBtn.disabled = true;
+      widthInput.value = 800; heightInput.value = 600; qualityRange.value = 0.9; qualityLabel.textContent='90%';
+    });
 
-  ['dragenter','dragover','dragleave','drop'].forEach(evt=>{
-    window.addEventListener(evt, e=>{ e.preventDefault(); });
-  });
-</script>
+    ['dragenter','dragover','dragleave','drop'].forEach(evt=>{
+      window.addEventListener(evt, e=>{ e.preventDefault(); });
+    });
+  </script>
 </body>
 </html>
-
-
