@@ -34,7 +34,7 @@
     .links{margin-top:18px;text-align:center}
     .links a{display:inline-block;margin:6px;padding:8px 12px;border:1px solid #007bff;color:#007bff;border-radius:8px;text-decoration:none}
     .links a:hover{background:#007bff;color:#fff}
-    footer{text-align:center;padding:12px;color:#666;margin-top:12px}
+    footer{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;color:#666;font-size:14px;margin-top:12px;}
   </style>
 </head>
 <body>
@@ -69,7 +69,11 @@
   </div>
 </div>
 
-<footer>© 2025 جميع الحقوق محفوظة</footer>
+<footer>
+  <span>© 2025 جميع الحقوق محفوظة</span>
+  <span>|</span>
+  <a href="./privacy.html" style="color:#0b5cff;text-decoration:none;">سياسة الخصوصية</a>
+</footer>
 
 <script>
   const fileInput = document.getElementById('fileInput');
