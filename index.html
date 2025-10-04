@@ -1,26 +1,13 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>موقع تعديل الصور</title>
+  <title>Image Editing Website</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  
-  <!-- Adsense verification -->
-  <meta name="google-adsense-account" content="ca-pub-9629738997503614">
 
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-CECGX11WVH"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-CECGX11WVH');
-  </script>
-  
   <style>
-    body{font-family:sans-serif;background:#f8f9fa;margin:0;padding:0;direction:rtl}
+    body{font-family:sans-serif;background:#f8f9fa;margin:0;padding:0;direction:ltr}
     header{background:#007bff;color:#fff;padding:16px 12px;text-align:center;font-size:1.4rem}
     .grid{max-width:1000px;margin:28px auto;display:grid;gap:18px;padding:18px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
     .card{background:#fff;border-radius:12px;padding:24px;text-align:center;text-decoration:none;color:inherit;box-shadow:0 6px 20px rgba(0,0,0,0.06);transition:all .2s;display:flex;flex-direction:column;align-items:center;justify-content:center}
@@ -35,37 +22,100 @@
   </style>
 </head>
 <body>
-  <header>📸 موقع تعديل وتحويل الصور</header>
+  <header id="site-header">📸 Image Editing & Conversion</header>
 
   <div class="grid">
     <a class="card" href="./resize.html">
       <i class="fa-solid fa-crop"></i>
-      <h3>تعديل أبعاد الصور</h3>
-      <p>قص، تغيير الحجم وحفظ الجودة المطلوبة</p>
+      <h3 class="resize-title">Resize Images</h3>
+      <p class="resize-desc">Crop, resize, and keep the desired quality</p>
     </a>
 
     <a class="card" href="./convert.html">
       <i class="fa-solid fa-arrows-rotate"></i>
-      <h3>تحويل صيغة الصور</h3>
-      <p>حوّل بين PNG / JPEG / WEBP محليًا في المتصفح</p>
+      <h3 class="convert-title">Convert Image Format</h3>
+      <p class="convert-desc">Convert between PNG / JPEG / WEBP locally in browser</p>
     </a>
 
     <a class="card" href="./crop.html">
       <i class="fa-solid fa-expand"></i>
-      <h3>قص الصور</h3>
-      <p>أداة قص تفاعلية باستخدام Cropper.js</p>
+      <h3 class="crop-title">Crop Images</h3>
+      <p class="crop-desc">Interactive cropping tool using Cropper.js</p>
     </a>
 
     <a class="card" href="./features.html">
       <i class="fa-solid fa-star"></i>
-      <h3>مميزات الموقع</h3>
-      <p>سرعة، خصوصية، واجهة عربية سهلة</p>
+      <h3 class="features-title">Website Features</h3>
+      <p class="features-desc">Fast, private, easy-to-use interface</p>
     </a>
   </div>
 
   <footer>
-    © 2025 جميع الحقوق محفوظة |
-    <a href="privacy.html">سياسة الخصوصية</a>
+    <span id="footer-text">© 2025 All rights reserved |</span>
+    <a href="privacy.html">Privacy Policy</a>
   </footer>
+
+  <script>
+    const translations = {
+      ar: {
+        header: "📸 موقع تعديل وتحويل الصور",
+        resizeTitle: "تعديل أبعاد الصور",
+        resizeDesc: "قص، تغيير الحجم وحفظ الجودة المطلوبة",
+        convertTitle: "تحويل صيغة الصور",
+        convertDesc: "حوّل بين PNG / JPEG / WEBP محليًا في المتصفح",
+        cropTitle: "قص الصور",
+        cropDesc: "أداة قص تفاعلية باستخدام Cropper.js",
+        featuresTitle: "مميزات الموقع",
+        featuresDesc: "سرعة، خصوصية، واجهة عربية سهلة",
+        footer: "© 2025 جميع الحقوق محفوظة |"
+      },
+      fr: {
+        header: "📸 Édition et conversion d'images",
+        resizeTitle: "Redimensionner les images",
+        resizeDesc: "Couper, redimensionner et conserver la qualité souhaitée",
+        convertTitle: "Convertir le format d'image",
+        convertDesc: "Convertir entre PNG / JPEG / WEBP localement dans le navigateur",
+        cropTitle: "Recadrer les images",
+        cropDesc: "Outil de recadrage interactif avec Cropper.js",
+        featuresTitle: "Fonctionnalités du site",
+        featuresDesc: "Rapide, privé, interface facile à utiliser",
+        footer: "© 2025 Tous droits réservés |"
+      }
+      // أضف لغات أخرى هنا حسب الحاجة
+    };
+
+    const userLang = navigator.language.split('-')[0]; // مثال: "en", "ar"
+    const t = translations[userLang] || {
+      header: "📸 Image Editing & Conversion",
+      resizeTitle: "Resize Images",
+      resizeDesc: "Crop, resize, and keep the desired quality",
+      convertTitle: "Convert Image Format",
+      convertDesc: "Convert between PNG / JPEG / WEBP locally in browser",
+      cropTitle: "Crop Images",
+      cropDesc: "Interactive cropping tool using Cropper.js",
+      featuresTitle: "Website Features",
+      featuresDesc: "Fast, private, easy-to-use interface",
+      footer: "© 2025 All rights reserved |"
+    };
+
+    // تطبيق الترجمات
+    document.getElementById('site-header').innerText = t.header;
+    document.querySelector('.resize-title').innerText = t.resizeTitle;
+    document.querySelector('.resize-desc').innerText = t.resizeDesc;
+    document.querySelector('.convert-title').innerText = t.convertTitle;
+    document.querySelector('.convert-desc').innerText = t.convertDesc;
+    document.querySelector('.crop-title').innerText = t.cropTitle;
+    document.querySelector('.crop-desc').innerText = t.cropDesc;
+    document.querySelector('.features-title').innerText = t.featuresTitle;
+    document.querySelector('.features-desc').innerText = t.featuresDesc;
+    document.getElementById('footer-text').innerText = t.footer;
+
+    // تغيير اتجاه الصفحة RTL للعربية فقط
+    if(userLang === 'ar'){
+      document.body.style.direction = 'rtl';
+    } else {
+      document.body.style.direction = 'ltr';
+    }
+  </script>
 </body>
 </html>
