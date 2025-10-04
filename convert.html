@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>محول صيغ الصور</title>
+  <title>Image Format Converter</title>
 
   <!-- AdSense Verification -->
   <meta name="google-adsense-account" content="ca-pub-9629738997503614">
@@ -14,13 +14,12 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-CECGX11WVH');
   </script>
 
   <style>
     :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans",Arial}
-    body{background:#f6f7f9;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;direction:rtl}
+    body{background:#f6f7f9;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;direction:ltr}
     .card{width:100%;max-width:900px;background:#fff;padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(10,20,40,0.08)}
     h1{text-align:center;margin:6px 0 14px}
     .row{display:grid;grid-template-columns:1fr 320px;gap:16px}
@@ -40,18 +39,18 @@
 </head>
 <body>
   <div class="card">
-    <h1>🔄 محول صيغ الصور</h1>
+    <h1 id="page-title">🔄 Image Format Converter</h1>
     <div class="row">
       <div class="left">
         <div id="dropZone" class="drop">
-          اسحب الصورة هنا أو اضغط لاختيار ملف<br>
-          <small class="small">يدعم PNG / JPEG / WEBP (صور GIF المتحركة تتحول لصورة ثابتة)</small>
+          Drag & Drop or click to choose file<br>
+          <small class="small" id="supported-text">Supports PNG / JPEG / WEBP (animated GIFs converted to static images)</small>
           <input id="fileInput" type="file" accept="image/*" style="display:none">
         </div>
 
         <div class="controls">
           <div>
-            <label for="toFormat">تحويل إلى</label>
+            <label for="toFormat" id="format-label">Convert to</label>
             <select id="toFormat">
               <option value="image/png">PNG</option>
               <option value="image/jpeg">JPEG</option>
@@ -60,34 +59,34 @@
           </div>
 
           <div>
-            <label for="qualityRange">الجودة (JPEG/WEBP) <span id="qLabel">90%</span></label>
+            <label for="qualityRange" id="quality-label">Quality (JPEG/WEBP) <span id="qLabel">90%</span></label>
             <input id="qualityRange" type="range" min="0.1" max="1" step="0.05" value="0.9">
           </div>
 
           <div>
-            <label for="widthInput">العرض (px) — اترك 0 للاحتفاظ بالأصل</label>
+            <label for="widthInput" id="width-label">Width (px) — 0 to keep original</label>
             <input id="widthInput" type="number" min="0" value="0">
           </div>
 
           <div>
-            <label for="heightInput">الارتفاع (px) — اترك 0 للاحتفاظ بالأصل</label>
+            <label for="heightInput" id="height-label">Height (px) — 0 to keep original</label>
             <input id="heightInput" type="number" min="0" value="0">
           </div>
 
           <div style="align-self:end">
-            <label><input id="keepAspect" type="checkbox" checked> الحفاظ على نسبة العرض/الارتفاع</label>
+            <label><input id="keepAspect" type="checkbox" checked> <span id="aspect-label">Maintain aspect ratio</span></label>
           </div>
 
           <div style="align-self:end">
-            <button id="convertBtn" class="btn" disabled>⬇ تحويل وتنزيل</button>
+            <button id="convertBtn" class="btn" disabled>⬇ Convert & Download</button>
           </div>
         </div>
 
-        <p class="small">المعالجة تتم محليًا داخل المتصفح — لا تُرفع الصورة إلى أي خادم.</p>
+        <p class="small" id="note-text">Processing happens locally in your browser — image is not uploaded anywhere.</p>
 
-        <div class="link-row">
-          <a href="./index.html" style="text-decoration:none;color:#0b5cff">🏠 العودة للرئيسية</a> &nbsp; | &nbsp;
-          <a href="./privacy.html" target="_blank" style="text-decoration:none;color:#0b5cff">سياسة الخصوصية</a>
+        <div class="link-row" id="links-row">
+          <a href="./index.html" style="text-decoration:none;color:#0b5cff">🏠 Home</a> &nbsp; | &nbsp;
+          <a href="./privacy.html" target="_blank" style="text-decoration:none;color:#0b5cff">Privacy Policy</a>
         </div>
       </div>
 
@@ -101,102 +100,161 @@
   </div>
 
 <script>
-  const dropZone = document.getElementById('dropZone');
-  const fileInput = document.getElementById('fileInput');
-  const previewArea = document.getElementById('previewArea');
-  const meta = document.getElementById('meta');
-  const toFormat = document.getElementById('toFormat');
-  const qualityRange = document.getElementById('qualityRange');
-  const qLabel = document.getElementById('qLabel');
-  const widthInput = document.getElementById('widthInput');
-  const heightInput = document.getElementById('heightInput');
-  const keepAspect = document.getElementById('keepAspect');
-  const convertBtn = document.getElementById('convertBtn');
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
+const translations = {
+  ar: {
+    pageTitle: "🔄 محول صيغ الصور",
+    supportedText: "يدعم PNG / JPEG / WEBP (صور GIF المتحركة تتحول لصورة ثابتة)",
+    formatLabel: "تحويل إلى",
+    qualityLabel: "الجودة (JPEG/WEBP) ",
+    widthLabel: "العرض (px) — اترك 0 للاحتفاظ بالأصل",
+    heightLabel: "الارتفاع (px) — اترك 0 للاحتفاظ بالأصل",
+    aspectLabel: "الحفاظ على نسبة العرض/الارتفاع",
+    convertBtn: "⬇ تحويل وتنزيل",
+    noteText: "المعالجة تتم محليًا داخل المتصفح — لا تُرفع الصورة إلى أي خادم.",
+    links: ["🏠 العودة للرئيسية","سياسة الخصوصية"]
+  },
+  fr: {
+    pageTitle: "🔄 Convertisseur de format d'image",
+    supportedText: "Prend en charge PNG / JPEG / WEBP (les GIF animés deviennent statiques)",
+    formatLabel: "Convertir en",
+    qualityLabel: "Qualité (JPEG/WEBP) ",
+    widthLabel: "Largeur (px) — 0 pour garder l'original",
+    heightLabel: "Hauteur (px) — 0 pour garder l'original",
+    aspectLabel: "Conserver le ratio largeur/hauteur",
+    convertBtn: "⬇ Convertir & Télécharger",
+    noteText: "Traitement localement dans le navigateur — l'image n'est pas téléchargée",
+    links: ["🏠 Accueil","Politique de confidentialité"]
+  }
+};
 
-  let image = new Image();
-  let originalName = '';
-  let aspect = 1;
+const userLang = navigator.language.split('-')[0];
+const t = translations[userLang] || {
+  pageTitle: "🔄 Image Format Converter",
+  supportedText: "Supports PNG / JPEG / WEBP (animated GIFs converted to static images)",
+  formatLabel: "Convert to",
+  qualityLabel: "Quality (JPEG/WEBP) ",
+  widthLabel: "Width (px) — 0 to keep original",
+  heightLabel: "Height (px) — 0 to keep original",
+  aspectLabel: "Maintain aspect ratio",
+  convertBtn: "⬇ Convert & Download",
+  noteText: "Processing happens locally in your browser — image is not uploaded anywhere.",
+  links: ["🏠 Home","Privacy Policy"]
+};
 
-  dropZone.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', (e) => { if (e.target.files && e.target.files[0]) loadFile(e.target.files[0]); });
+// Apply translations
+document.getElementById('page-title').innerText = t.pageTitle;
+document.getElementById('supported-text').innerText = t.supportedText;
+document.getElementById('format-label').innerText = t.formatLabel;
+document.getElementById('quality-label').childNodes[0].textContent = t.qualityLabel;
+document.getElementById('width-label').innerText = t.widthLabel;
+document.getElementById('height-label').innerText = t.heightLabel;
+document.getElementById('aspect-label').parentNode.childNodes[1].textContent = t.aspectLabel;
+document.getElementById('convertBtn').innerText = t.convertBtn;
+document.getElementById('note-text').innerText = t.noteText;
 
-  ['dragenter','dragover'].forEach(ev=>dropZone.addEventListener(ev,(e)=>{e.preventDefault();dropZone.classList.add('drag')}));
-  ['dragleave','drop'].forEach(ev=>dropZone.addEventListener(ev,(e)=>{e.preventDefault();dropZone.classList.remove('drag')}));
-  dropZone.addEventListener('drop', (e)=>{ const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) loadFile(f); });
+const links = document.getElementById('links-row').querySelectorAll('a');
+links.forEach((link,i) => link.innerText = t.links[i]);
 
-  function loadFile(file){
-    if(!file.type.startsWith('image/')){ alert('اختر ملف صورة فقط'); return; }
-    originalName = file.name.replace(/\.[^/.]+$/, "");
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      image = new Image();
-      image.onload = () => {
-        aspect = image.width / image.height;
-        previewArea.innerHTML = '';
-        image.style.maxWidth = '100%';
-        image.style.borderRadius = '8px';
-        previewArea.appendChild(image);
-        meta.innerHTML = `الاسم: <strong>${originalName}</strong> — الأبعاد: <strong>${image.width}×${image.height}</strong> — النوع: <strong>${file.type || 'غير معروف'}</strong>`;
-        convertBtn.disabled = false;
-        if(parseInt(widthInput.value) === 0) widthInput.value = image.width;
-        if(parseInt(heightInput.value) === 0) heightInput.value = image.height;
-      };
-      image.src = ev.target.result;
+if(userLang==='ar'){ document.body.style.direction='rtl'; } else { document.body.style.direction='ltr'; }
+
+// --- Existing converter functionality ---
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const previewArea = document.getElementById('previewArea');
+const meta = document.getElementById('meta');
+const toFormat = document.getElementById('toFormat');
+const qualityRange = document.getElementById('qualityRange');
+const qLabel = document.getElementById('qLabel');
+const widthInput = document.getElementById('widthInput');
+const heightInput = document.getElementById('heightInput');
+const keepAspect = document.getElementById('keepAspect');
+const convertBtn = document.getElementById('convertBtn');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+let image = new Image();
+let originalName = '';
+let aspect = 1;
+
+dropZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', (e) => { if (e.target.files && e.target.files[0]) loadFile(e.target.files[0]); });
+
+['dragenter','dragover'].forEach(ev=>dropZone.addEventListener(ev,(e)=>{e.preventDefault();dropZone.classList.add('drag')}));
+['dragleave','drop'].forEach(ev=>dropZone.addEventListener(ev,(e)=>{e.preventDefault();dropZone.classList.remove('drag')}));
+dropZone.addEventListener('drop', (e)=>{ const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) loadFile(f); });
+
+function loadFile(file){
+  if(!file.type.startsWith('image/')){ alert(t.pageTitle); return; }
+  originalName = file.name.replace(/\.[^/.]+$/, "");
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    image = new Image();
+    image.onload = () => {
+      aspect = image.width / image.height;
+      previewArea.innerHTML = '';
+      image.style.maxWidth = '100%';
+      image.style.borderRadius = '8px';
+      previewArea.appendChild(image);
+      meta.innerHTML = `Name: <strong>${originalName}</strong> — Dimensions: <strong>${image.width}×${image.height}</strong> — Type: <strong>${file.type || 'Unknown'}</strong>`;
+      convertBtn.disabled = false;
+      if(parseInt(widthInput.value) === 0) widthInput.value = image.width;
+      if(parseInt(heightInput.value) === 0) heightInput.value = image.height;
     };
-    reader.readAsDataURL(file);
+    image.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+qualityRange.addEventListener('input', ()=> qLabel.textContent = Math.round(qualityRange.value*100) + '%');
+
+widthInput.addEventListener('input', ()=> {
+  if(keepAspect.checked && image.width) {
+    const w = parseInt(widthInput.value) || 0;
+    if(w>0) heightInput.value = Math.round(w / aspect);
   }
-
-  qualityRange.addEventListener('input', ()=> qLabel.textContent = Math.round(qualityRange.value*100) + '%');
-
-  widthInput.addEventListener('input', ()=> {
-    if(keepAspect.checked && image.width) {
-      const w = parseInt(widthInput.value) || 0;
-      if(w>0) heightInput.value = Math.round(w / aspect);
-    }
-  });
-  heightInput.addEventListener('input', ()=> {
-    if(keepAspect.checked && image.height){
-      const h = parseInt(heightInput.value) || 0;
-      if(h>0) widthInput.value = Math.round(h * aspect);
-    }
-  });
-
-  convertBtn.addEventListener('click', ()=>{
-    if(!image.src) return alert('اختر صورة أولاً');
-    const targetMime = toFormat.value;
-    const q = parseFloat(qualityRange.value);
-    let w = parseInt(widthInput.value) || image.width;
-    let h = parseInt(heightInput.value) || image.height;
-    if(!w || !h){ w = image.width; h = image.height; }
-
-    canvas.width = w; canvas.height = h;
-    ctx.clearRect(0,0,w,h);
-    ctx.drawImage(image,0,0,w,h);
-
-    canvas.toBlob((blob)=>{
-      if(!blob) return alert('فشل في إنشاء الملف. حاول تغيير الإعدادات.');
-      const ext = mimeToExt(targetMime);
-      const fileName = `${originalName || 'image'}-converted.${ext}`;
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      URL.revokeObjectURL(link.href);
-      link.remove();
-    }, targetMime, q);
-  });
-
-  function mimeToExt(mime){
-    if(mime==='image/png') return 'png';
-    if(mime==='image/jpeg') return 'jpg';
-    if(mime==='image/webp') return 'webp';
-    return 'png';
+});
+heightInput.addEventListener('input', ()=> {
+  if(keepAspect.checked && image.height){
+    const h = parseInt(heightInput.value) || 0;
+    if(h>0) widthInput.value = Math.round(h * aspect);
   }
+});
 
-  ['dragenter','dragover','dragleave','drop'].forEach(evt=>window.addEventListener(evt,e=>e.preventDefault()));
+convertBtn.addEventListener('click', ()=> {
+  if(!image.src) return alert(t.pageTitle);
+  const targetMime = toFormat.value;
+  const q = parseFloat(qualityRange.value);
+  let w = parseInt(widthInput.value) || image.width;
+  let h = parseInt(heightInput.value) || image.height;
+  if(!w || !h){ w = image.width; h = image.height; }
+
+  canvas.width = w; canvas.height = h;
+  ctx.clearRect(0,0,w,h);
+  ctx.drawImage(image,0,0,w,h);
+
+  canvas.toBlob((blob)=>{
+    if(!blob) return alert('Failed to create file');
+    const ext = mimeToExt(targetMime);
+    const fileName = `${originalName || 'image'}-converted.${ext}`;
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    URL.revokeObjectURL(link.href);
+    link.remove();
+  }, targetMime, q);
+});
+
+function mimeToExt(mime){
+  if(mime==='image/png') return 'png';
+  if(mime==='image/jpeg') return 'jpg';
+  if(mime==='image/webp') return 'webp';
+  return 'png';
+}
+
+['dragenter','dragover','dragleave','drop'].forEach(evt=>window.addEventListener(evt,e=>e.preventDefault()));
 </script>
 </body>
 </html>
+
