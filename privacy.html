@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="google-adsense-account" content="ca-pub-9629738997503614">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>سياسة الخصوصية</title>
+  <title>Privacy Policy</title>
   <style>
     body {
       font-family: sans-serif;
@@ -12,7 +12,7 @@
       margin: 0;
       padding: 20px;
       line-height: 1.8;
-      direction: rtl;
+      direction: ltr;
       color: #333;
     }
     .container {
@@ -48,33 +48,77 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>سياسة الخصوصية</h1>
-    <p>نحن في <strong>موقع تغيير أبعاد الصور</strong> نحترم خصوصية زوارنا. توضح هذه السياسة كيفية جمعنا واستخدامنا وحماية معلوماتك.</p>
+<div class="container">
+  <h1 id="page-title">Privacy Policy</h1>
+  <p id="intro-text">We at <strong>Image Resizer</strong> respect the privacy of our visitors. This policy explains how we collect, use, and protect your information.</p>
 
-    <h2>المعلومات التي نجمعها</h2>
-    <p>هذا الموقع لا يجمع أي معلومات شخصية عن الزوار. جميع عمليات تعديل الصور تتم محلياً على جهازك ولا يتم رفع الصور إلى خوادمنا.</p>
+  <h2 id="info-title">Information We Collect</h2>
+  <p id="info-text">This website does not collect any personal information. All image modifications are done locally on your device and are not uploaded to our servers.</p>
 
-    <h2>ملفات تعريف الارتباط (Cookies)</h2>
-    <p>قد نستخدم ملفات تعريف الارتباط لتحسين تجربة التصفح. يمكنك تعطيل ملفات تعريف الارتباط من إعدادات المتصفح الخاص بك.</p>
+  <h2 id="cookies-title">Cookies</h2>
+  <p id="cookies-text">We may use cookies to improve browsing experience. You can disable cookies in your browser settings.</p>
 
-    <h2>الإعلانات</h2>
-    <p>قد نعرض إعلانات من طرف ثالث (مثل Google AdSense) والتي قد تستخدم ملفات تعريف الارتباط لعرض إعلانات مخصصة.</p>
+  <h2 id="ads-title">Advertisements</h2>
+  <p id="ads-text">We may display third-party ads (e.g., Google AdSense) which may use cookies for personalized ads.</p>
 
-    <h2>حقوق الملكية الفكرية</h2>
-    <p>جميع حقوق المحتوى والتصميم محفوظة لموقع تغيير أبعاد الصور.</p>
+  <h2 id="ip-title">Intellectual Property</h2>
+  <p id="ip-text">All content and design rights are reserved for Image Resizer.</p>
 
-    <h2>التعديلات على السياسة</h2>
-    <p>قد نقوم بتحديث سياسة الخصوصية من وقت لآخر. سيتم نشر أي تحديثات في هذه الصفحة.</p>
+  <h2 id="update-title">Policy Updates</h2>
+  <p id="update-text">We may update this privacy policy from time to time. Any updates will be posted on this page.</p>
 
-    <h2>اتصل بنا</h2>
-    <p>إذا كان لديك أي أسئلة حول سياسة الخصوصية، يمكنك التواصل معنا عبر البريد الإلكتروني:  
-      <a href="mailto:anaskabo263@gmail.com">anaskabo263@gmail.com</a>
-    </p>
+  <h2 id="contact-title">Contact Us</h2>
+  <p id="contact-text">If you have any questions about this privacy policy, contact us at:  
+    <a href="mailto:anaskabo263@gmail.com">anaskabo263@gmail.com</a>
+  </p>
 
-    <p><a href="index.html">⬅ العودة إلى الصفحة الرئيسية</a></p>
-  </div>
+  <p><a href="index.html" id="back-link">⬅ Back to Home</a></p>
+</div>
 
-  <footer>© 2025 جميع الحقوق محفوظة</footer>
+<footer>© 2025 All Rights Reserved</footer>
+
+<script>
+const translations = {
+  ar: {
+    pageTitle: "سياسة الخصوصية",
+    introText: "نحن في <strong>موقع تغيير أبعاد الصور</strong> نحترم خصوصية زوارنا. توضح هذه السياسة كيفية جمعنا واستخدامنا وحماية معلوماتك.",
+    infoTitle: "المعلومات التي نجمعها",
+    infoText: "هذا الموقع لا يجمع أي معلومات شخصية عن الزوار. جميع عمليات تعديل الصور تتم محلياً على جهازك ولا يتم رفع الصور إلى خوادمنا.",
+    cookiesTitle: "ملفات تعريف الارتباط (Cookies)",
+    cookiesText: "قد نستخدم ملفات تعريف الارتباط لتحسين تجربة التصفح. يمكنك تعطيل ملفات تعريف الارتباط من إعدادات المتصفح الخاص بك.",
+    adsTitle: "الإعلانات",
+    adsText: "قد نعرض إعلانات من طرف ثالث (مثل Google AdSense) والتي قد تستخدم ملفات تعريف الارتباط لعرض إعلانات مخصصة.",
+    ipTitle: "حقوق الملكية الفكرية",
+    ipText: "جميع حقوق المحتوى والتصميم محفوظة لموقع تغيير أبعاد الصور.",
+    updateTitle: "التعديلات على السياسة",
+    updateText: "قد نقوم بتحديث سياسة الخصوصية من وقت لآخر. سيتم نشر أي تحديثات في هذه الصفحة.",
+    contactTitle: "اتصل بنا",
+    contactText: "إذا كان لديك أي أسئلة حول سياسة الخصوصية، يمكنك التواصل معنا عبر البريد الإلكتروني: <a href='mailto:anaskabo263@gmail.com'>anaskabo263@gmail.com</a>",
+    backLink: "⬅ العودة إلى الصفحة الرئيسية",
+    footer: "© 2025 جميع الحقوق محفوظة"
+  }
+};
+
+const userLang = navigator.language.split('-')[0];
+if(userLang==='ar'){
+  document.body.style.direction='rtl';
+  document.getElementById('page-title').innerText = translations.ar.pageTitle;
+  document.getElementById('intro-text').innerHTML = translations.ar.introText;
+  document.getElementById('info-title').innerText = translations.ar.infoTitle;
+  document.getElementById('info-text').innerText = translations.ar.infoText;
+  document.getElementById('cookies-title').innerText = translations.ar.cookiesTitle;
+  document.getElementById('cookies-text').innerText = translations.ar.cookiesText;
+  document.getElementById('ads-title').innerText = translations.ar.adsTitle;
+  document.getElementById('ads-text').innerText = translations.ar.adsText;
+  document.getElementById('ip-title').innerText = translations.ar.ipTitle;
+  document.getElementById('ip-text').innerText = translations.ar.ipText;
+  document.getElementById('update-title').innerText = translations.ar.updateTitle;
+  document.getElementById('update-text').innerText = translations.ar.updateText;
+  document.getElementById('contact-title').innerText = translations.ar.contactTitle;
+  document.getElementById('contact-text').innerHTML = translations.ar.contactText;
+  document.getElementById('back-link').innerText = translations.ar.backLink;
+  document.querySelector('footer').innerText = translations.ar.footer;
+}
+</script>
 </body>
 </html>
