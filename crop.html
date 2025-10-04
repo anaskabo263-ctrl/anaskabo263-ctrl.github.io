@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>قص الصور</title>
+  <title>Crop Images</title>
 
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-CECGX11WVH"></script>
@@ -22,7 +22,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
   <style>
-    body{margin:0;font-family:sans-serif;background:#f8f9fa;direction:rtl;color:#333}
+    body{margin:0;font-family:sans-serif;background:#f8f9fa;direction:ltr;color:#333}
     header{background:#007bff;color:#fff;padding:14px;text-align:center;font-size:1.3rem}
     .container{max-width:980px;margin:18px auto;background:#fff;padding:14px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
     .info{background:#f1f9ff;border:1px solid #cce5ff;padding:12px;border-radius:8px;margin-bottom:12px}
@@ -38,44 +38,120 @@
   </style>
 </head>
 <body>
-<header>✂️ أداة قص الصور</header>
+<header id="site-header">✂️ Crop Tool</header>
 
 <div class="container">
-  <div class="info">
-    <strong>طريقة الاستخدام:</strong>
-    <ol style="margin:6px 0;padding-inline-start:18px">
-      <li>اضغط "اختر صورة" لتحميل صورة من جهازك.</li>
-      <li>اضبط إطار القص على الصورة كما تريد.</li>
-      <li>اضغط "قص وتحميل" لحفظ النتيجة.</li>
+  <div class="info" id="info-text">
+    <strong>How to use:</strong>
+    <ol style="margin:6px 0;padding-inline-start:18px" id="steps-list">
+      <li>Click "Choose Image" to upload an image from your device.</li>
+      <li>Adjust the crop frame as you want.</li>
+      <li>Click "Crop & Download" to save the result.</li>
     </ol>
   </div>
 
   <div class="buttons">
-    <label class="btn" for="fileInput">📁 اختر صورة</label>
+    <label class="btn" for="fileInput" id="choose-btn">📁 Choose Image</label>
     <input id="fileInput" type="file" accept="image/*" style="display:none">
-    <button id="cropBtn" class="btn" disabled>📥 قص وتحميل</button>
+    <button id="cropBtn" class="btn" disabled>📥 Crop & Download</button>
   </div>
 
   <div class="img-container">
-    <img id="image" src="" alt="قم بتحميل صورة للقص">
+    <img id="image" src="" alt="Upload an image to crop">
   </div>
 
-  <div class="links">
-    <a href="./index.html">🏠 الرئيسية</a>
-    <a href="./resize.html">📐 تعديل الأبعاد</a>
-    <a href="./convert.html">🔄 تحويل صيغة</a>
-    <a href="./features.html">⭐ مميزات</a>
-    <a href="./privacy.html">🔒 سياسة الخصوصية</a>
+  <div class="links" id="links-text">
+    <a href="./index.html">🏠 Home</a>
+    <a href="./resize.html">📐 Resize</a>
+    <a href="./convert.html">🔄 Convert</a>
+    <a href="./features.html">⭐ Features</a>
+    <a href="./privacy.html">🔒 Privacy Policy</a>
   </div>
 </div>
 
 <footer>
-  <span>© 2025 جميع الحقوق محفوظة</span>
+  <span id="footer-text">© 2025 All rights reserved</span>
   <span>|</span>
-  <a href="./privacy.html" style="color:#0b5cff;text-decoration:none;">سياسة الخصوصية</a>
+  <a href="./privacy.html" style="color:#0b5cff;text-decoration:none;">Privacy Policy</a>
 </footer>
 
 <script>
+  const translations = {
+    ar: {
+      header: "✂️ أداة قص الصور",
+      infoStrong: "طريقة الاستخدام:",
+      steps: [
+        'اضغط "اختر صورة" لتحميل صورة من جهازك.',
+        "اضبط إطار القص على الصورة كما تريد.",
+        'اضغط "قص وتحميل" لحفظ النتيجة.'
+      ],
+      chooseBtn: "📁 اختر صورة",
+      cropBtn: "📥 قص وتحميل",
+      links: ["🏠 الرئيسية","📐 تعديل الأبعاد","🔄 تحويل صيغة","⭐ مميزات","🔒 سياسة الخصوصية"],
+      footer: "© 2025 جميع الحقوق محفوظة"
+    },
+    fr: {
+      header: "✂️ Outil de recadrage",
+      infoStrong: "Comment utiliser :",
+      steps: [
+        'Cliquez sur "Choisir une image" pour télécharger une image depuis votre appareil.',
+        "Ajustez le cadre de recadrage comme vous le souhaitez.",
+        'Cliquez sur "Recadrer & Télécharger" pour enregistrer le résultat.'
+      ],
+      chooseBtn: "📁 Choisir une image",
+      cropBtn: "📥 Recadrer & Télécharger",
+      links: ["🏠 Accueil","📐 Redimensionner","🔄 Convertir","⭐ Fonctionnalités","🔒 Politique de confidentialité"],
+      footer: "© 2025 Tous droits réservés"
+    }
+    // يمكن إضافة لغات أخرى هنا
+  };
+
+  const userLang = navigator.language.split('-')[0]; // مثال: "en", "ar"
+  const t = translations[userLang] || {
+    header: "✂️ Crop Tool",
+    infoStrong: "How to use:",
+    steps: [
+      'Click "Choose Image" to upload an image from your device.',
+      "Adjust the crop frame as you want.",
+      'Click "Crop & Download" to save the result.'
+    ],
+    chooseBtn: "📁 Choose Image",
+    cropBtn: "📥 Crop & Download",
+    links: ["🏠 Home","📐 Resize","🔄 Convert","⭐ Features","🔒 Privacy Policy"],
+    footer: "© 2025 All rights reserved"
+  };
+
+  // تطبيق الترجمات
+  document.getElementById('site-header').innerText = t.header;
+
+  const infoDiv = document.getElementById('info-text');
+  infoDiv.querySelector('strong').innerText = t.infoStrong;
+
+  const stepsList = document.getElementById('steps-list');
+  stepsList.innerHTML = '';
+  t.steps.forEach(step => {
+    const li = document.createElement('li');
+    li.innerText = step;
+    stepsList.appendChild(li);
+  });
+
+  document.getElementById('choose-btn').innerText = t.chooseBtn;
+  document.getElementById('cropBtn').innerText = t.cropBtn;
+
+  const linksDiv = document.getElementById('links-text');
+  const links = linksDiv.querySelectorAll('a');
+  links.forEach((link, i) => { link.innerText = t.links[i]; });
+
+  document.getElementById('footer-text').innerText = t.footer;
+
+  // اتجاه الصفحة
+  if(userLang === 'ar'){
+    document.body.style.direction = 'rtl';
+  } else {
+    document.body.style.direction = 'ltr';
+  }
+
+  // Cropper.js functionality
   const fileInput = document.getElementById('fileInput');
   const cropBtn = document.getElementById('cropBtn');
   const image = document.getElementById('image');
@@ -84,7 +160,7 @@
   fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if(!file) return;
-    if(!file.type.startsWith('image/')) { alert('اختر ملف صورة فقط'); return; }
+    if(!file.type.startsWith('image/')) { alert(t.chooseBtn); return; }
 
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -104,9 +180,9 @@
   });
 
   cropBtn.addEventListener('click', ()=>{
-    if(!cropper) return alert('اختر صورة أولاً');
+    if(!cropper) return alert(t.chooseBtn);
     const croppedCanvas = cropper.getCroppedCanvas({ maxWidth:4096, maxHeight:4096 });
-    if(!croppedCanvas) return alert('فشل القص');
+    if(!croppedCanvas) return alert('Failed to crop');
 
     croppedCanvas.toBlob((blob)=>{
       const link = document.createElement('a');
@@ -119,8 +195,9 @@
     });
   });
 
-  // منع السحب الافتراضي على الصفحة
   ['dragenter','dragover','dragleave','drop'].forEach(evt=>window.addEventListener(evt,e=>e.preventDefault()));
 </script>
 </body>
 </html>
+
+
