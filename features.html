@@ -29,10 +29,10 @@
   </style>
 </head>
 <body>
-<header id="site-header"><h2>Website Features</h2></header>
+<header><h2>Website Features</h2></header>
 <main>
-  <h1 id="main-title">Why choose our website?</h1>
-  <ul id="features-list">
+  <h1>Why choose our website?</h1>
+  <ul>
     <li>📐 Easily resize images while keeping quality.</li>
     <li>✂️ Crop images precisely and easily using Cropper.js.</li>
     <li>🔄 Convert formats locally (PNG / JPEG / WEBP) without uploading online.</li>
@@ -41,75 +41,8 @@
     <li>🌍 Simple interface compatible with mobile and desktop.</li>
   </ul>
 
-  <a class="back" id="back-link" href="./index.html">⬅ Back to Home</a>
+  <a class="back" href="./index.html">⬅ Back to Home</a>
 </main>
-
-<script>
-  const translations = {
-    ar: {
-      header: "مميزات الموقع",
-      mainTitle: "لماذا تختار موقعنا؟",
-      features: [
-        "📐 تعديل أبعاد الصور بسهولة مع الحفاظ على الجودة.",
-        "✂️ قص الصور بشكل دقيق وسهل باستخدام Cropper.js.",
-        "🔄 تحويل الصيغ محليًا (PNG / JPEG / WEBP) بدون رفع للإنترنت.",
-        "⚡ أداء سريع — المعالجة تتم داخل المتصفح.",
-        "🔒 خصوصية: الصور لا تُرسل إلى خوادم خارجية (باستثناء حالات تفعيل سيرفر خاص).",
-        "🌍 واجهة عربية بسيطة ومتوافقة مع الموبايل والكمبيوتر."
-      ],
-      backText: "⬅ العودة إلى الصفحة الرئيسية"
-    },
-    fr: {
-      header: "Fonctionnalités du site",
-      mainTitle: "Pourquoi choisir notre site ?",
-      features: [
-        "📐 Redimensionner les images facilement tout en conservant la qualité.",
-        "✂️ Recadrer les images précisément et facilement avec Cropper.js.",
-        "🔄 Convertir les formats localement (PNG / JPEG / WEBP) sans téléchargement.",
-        "⚡ Performance rapide — traitement dans le navigateur.",
-        "🔒 Confidentialité : les images ne sont pas envoyées à des serveurs externes.",
-        "🌍 Interface simple compatible mobile et ordinateur."
-      ],
-      backText: "⬅ Retour à la page d'accueil"
-    }
-    // أضف لغات أخرى حسب الحاجة
-  };
-
-  const userLang = navigator.language.split('-')[0]; // مثال: "en", "ar"
-  const t = translations[userLang] || {
-    header: "Website Features",
-    mainTitle: "Why choose our website?",
-    features: [
-      "📐 Easily resize images while keeping quality.",
-      "✂️ Crop images precisely and easily using Cropper.js.",
-      "🔄 Convert formats locally (PNG / JPEG / WEBP) without uploading online.",
-      "⚡ Fast performance — processing happens in the browser.",
-      "🔒 Privacy: Images are not sent to external servers.",
-      "🌍 Simple interface compatible with mobile and desktop."
-    ],
-    backText: "⬅ Back to Home"
-  };
-
-  // تطبيق الترجمات
-  document.getElementById('site-header').querySelector('h2').innerText = t.header;
-  document.getElementById('main-title').innerText = t.mainTitle;
-  
-  const ul = document.getElementById('features-list');
-  ul.innerHTML = ''; // مسح العناصر الافتراضية
-  t.features.forEach(item => {
-    const li = document.createElement('li');
-    li.innerText = item;
-    ul.appendChild(li);
-  });
-
-  document.getElementById('back-link').innerText = t.backText;
-
-  // تغيير اتجاه الصفحة RTL للعربية فقط
-  if(userLang === 'ar'){
-    document.body.style.direction = 'rtl';
-  } else {
-    document.body.style.direction = 'ltr';
-  }
-</script>
 </body>
 </html>
+
