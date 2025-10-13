@@ -74,7 +74,7 @@
           </div>
 
           <div style="align-self:end">
-            <label><input id="keepAspect" type="checkbox" checked> <span id="aspect-label">Maintain aspect ratio</span></label>
+            <label><input id="keepAspect" type="checkbox" checked> Maintain aspect ratio</label>
           </div>
 
           <div style="align-self:end">
@@ -100,64 +100,6 @@
   </div>
 
 <script>
-const translations = {
-  ar: {
-    pageTitle: "🔄 محول صيغ الصور",
-    supportedText: "يدعم PNG / JPEG / WEBP (صور GIF المتحركة تتحول لصورة ثابتة)",
-    formatLabel: "تحويل إلى",
-    qualityLabel: "الجودة (JPEG/WEBP) ",
-    widthLabel: "العرض (px) — اترك 0 للاحتفاظ بالأصل",
-    heightLabel: "الارتفاع (px) — اترك 0 للاحتفاظ بالأصل",
-    aspectLabel: "الحفاظ على نسبة العرض/الارتفاع",
-    convertBtn: "⬇ تحويل وتنزيل",
-    noteText: "المعالجة تتم محليًا داخل المتصفح — لا تُرفع الصورة إلى أي خادم.",
-    links: ["🏠 العودة للرئيسية","سياسة الخصوصية"]
-  },
-  fr: {
-    pageTitle: "🔄 Convertisseur de format d'image",
-    supportedText: "Prend en charge PNG / JPEG / WEBP (les GIF animés deviennent statiques)",
-    formatLabel: "Convertir en",
-    qualityLabel: "Qualité (JPEG/WEBP) ",
-    widthLabel: "Largeur (px) — 0 pour garder l'original",
-    heightLabel: "Hauteur (px) — 0 pour garder l'original",
-    aspectLabel: "Conserver le ratio largeur/hauteur",
-    convertBtn: "⬇ Convertir & Télécharger",
-    noteText: "Traitement localement dans le navigateur — l'image n'est pas téléchargée",
-    links: ["🏠 Accueil","Politique de confidentialité"]
-  }
-};
-
-const userLang = navigator.language.split('-')[0];
-const t = translations[userLang] || {
-  pageTitle: "🔄 Image Format Converter",
-  supportedText: "Supports PNG / JPEG / WEBP (animated GIFs converted to static images)",
-  formatLabel: "Convert to",
-  qualityLabel: "Quality (JPEG/WEBP) ",
-  widthLabel: "Width (px) — 0 to keep original",
-  heightLabel: "Height (px) — 0 to keep original",
-  aspectLabel: "Maintain aspect ratio",
-  convertBtn: "⬇ Convert & Download",
-  noteText: "Processing happens locally in your browser — image is not uploaded anywhere.",
-  links: ["🏠 Home","Privacy Policy"]
-};
-
-// Apply translations
-document.getElementById('page-title').innerText = t.pageTitle;
-document.getElementById('supported-text').innerText = t.supportedText;
-document.getElementById('format-label').innerText = t.formatLabel;
-document.getElementById('quality-label').childNodes[0].textContent = t.qualityLabel;
-document.getElementById('width-label').innerText = t.widthLabel;
-document.getElementById('height-label').innerText = t.heightLabel;
-document.getElementById('aspect-label').parentNode.childNodes[1].textContent = t.aspectLabel;
-document.getElementById('convertBtn').innerText = t.convertBtn;
-document.getElementById('note-text').innerText = t.noteText;
-
-const links = document.getElementById('links-row').querySelectorAll('a');
-links.forEach((link,i) => link.innerText = t.links[i]);
-
-if(userLang==='ar'){ document.body.style.direction='rtl'; } else { document.body.style.direction='ltr'; }
-
-// --- Existing converter functionality ---
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
 const previewArea = document.getElementById('previewArea');
@@ -184,7 +126,7 @@ fileInput.addEventListener('change', (e) => { if (e.target.files && e.target.fil
 dropZone.addEventListener('drop', (e)=>{ const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) loadFile(f); });
 
 function loadFile(file){
-  if(!file.type.startsWith('image/')){ alert(t.pageTitle); return; }
+  if(!file.type.startsWith('image/')){ alert("Invalid file type"); return; }
   originalName = file.name.replace(/\.[^/.]+$/, "");
   const reader = new FileReader();
   reader.onload = (ev) => {
@@ -221,7 +163,7 @@ heightInput.addEventListener('input', ()=> {
 });
 
 convertBtn.addEventListener('click', ()=> {
-  if(!image.src) return alert(t.pageTitle);
+  if(!image.src) return alert("No image loaded");
   const targetMime = toFormat.value;
   const q = parseFloat(qualityRange.value);
   let w = parseInt(widthInput.value) || image.width;
