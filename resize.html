@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     body{font-family:sans-serif;background:#f8f9fa;margin:0;padding:18px;direction:ltr}
-    body.rtl{direction:rtl;}
     .card{max-width:900px;margin:12px auto;background:#fff;padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(10,20,40,0.06)}
     h1{text-align:center;margin:6px 0 16px}
     .drop{border:2px dashed #d8dee6;border-radius:10px;padding:18px;text-align:center;cursor:pointer;background:#fbfcfe}
@@ -29,11 +28,11 @@
 </head>
 <body>
   <div class="card">
-    <h1 id="title">🖼️ Image Resizer</h1>
+    <h1>🖼️ Image Resizer</h1>
 
     <div id="dropZone" class="drop">
-      <span id="dropText">Drag & drop an image here or click to select a file</span><br>
-      <small id="dropNote" class="small">Supports PNG / JPEG / WEBP — processing happens locally</small>
+      <span>Drag & drop an image here or click to select a file</span><br>
+      <small class="small">Supports PNG / JPEG / WEBP — processing happens locally</small>
       <input id="fileInput" type="file" accept="image/*" style="display:none">
     </div>
 
@@ -41,18 +40,18 @@
 
     <div class="controls">
       <div>
-        <label for="widthInput" id="widthLabel">Width (px)</label>
+        <label for="widthInput">Width (px)</label>
         <input id="widthInput" type="number" value="800" min="1">
       </div>
       <div>
-        <label for="heightInput" id="heightLabel">Height (px)</label>
+        <label for="heightInput">Height (px)</label>
         <input id="heightInput" type="number" value="600" min="1">
       </div>
       <div>
-        <label><input id="keepAspect" type="checkbox" checked> <span id="aspectLabel">Keep aspect ratio</span></label>
+        <label><input id="keepAspect" type="checkbox" checked> Keep aspect ratio</label>
       </div>
       <div>
-        <label for="formatSelect" id="formatLabel">Format</label>
+        <label for="formatSelect">Format</label>
         <select id="formatSelect">
           <option value="image/png">PNG</option>
           <option value="image/jpeg">JPEG</option>
@@ -60,7 +59,7 @@
         </select>
       </div>
       <div>
-        <label for="qualityRange" id="qualityLabelText">Quality: <span id="qualityLabel">90%</span></label>
+        <label for="qualityRange">Quality: <span id="qualityLabel">90%</span></label>
         <input id="qualityRange" type="range" min="0.1" max="1" step="0.05" value="0.9">
       </div>
     </div>
@@ -90,65 +89,6 @@
   <canvas id="canvas" style="display:none"></canvas>
 
   <script>
-    // ---------- Language Support ----------
-    const lang = navigator.language && navigator.language.startsWith('ar') ? 'ar' : 'en';
-    if(lang === 'ar') document.body.classList.add('rtl');
-
-    const translations = {
-      ar: {
-        title: "🖼️ تعديل أبعاد الصورة",
-        dropText: "اسحب صورة هنا أو اضغط لاختيار ملف",
-        dropNote: "يدعم PNG / JPEG / WEBP — المعالجة محليًا على جهازك",
-        widthLabel: "العرض (px)",
-        heightLabel: "الارتفاع (px)",
-        aspectLabel: "حفظ نسبة العرض/الارتفاع",
-        formatLabel: "الصيغة",
-        qualityLabelText: "الجودة:",
-        downloadBtn: "⬇ تحميل الصورة",
-        resetBtn: "إعادة تعيين",
-        links: ["🏠 الرئيسية","🔄 تحويل صيغة","✂ قص","⭐ مميزات","🔒 سياسة الخصوصية"],
-        footer: ["© 2025 جميع الحقوق محفوظة","سياسة الخصوصية"]
-      },
-      en: {
-        title: "🖼️ Image Resizer",
-        dropText: "Drag & drop an image here or click to select a file",
-        dropNote: "Supports PNG / JPEG / WEBP — processing happens locally",
-        widthLabel: "Width (px)",
-        heightLabel: "Height (px)",
-        aspectLabel: "Keep aspect ratio",
-        formatLabel: "Format",
-        qualityLabelText: "Quality:",
-        downloadBtn: "⬇ Download",
-        resetBtn: "Reset",
-        links: ["🏠 Home","🔄 Convert","✂ Crop","⭐ Features","🔒 Privacy Policy"],
-        footer: ["© 2025 All rights reserved","Privacy Policy"]
-      }
-    };
-
-    const t = translations[lang];
-    document.getElementById('title').textContent = t.title;
-    document.getElementById('dropText').textContent = t.dropText;
-    document.getElementById('dropNote').textContent = t.dropNote;
-    document.getElementById('widthLabel').textContent = t.widthLabel;
-    document.getElementById('heightLabel').textContent = t.heightLabel;
-    document.getElementById('aspectLabel').textContent = t.aspectLabel;
-    document.getElementById('formatLabel').textContent = t.formatLabel;
-    // set quality label text node safely
-    const qLabelText = document.getElementById('qualityLabelText');
-    if (qLabelText) {
-      // replace only the text node before the span
-      const span = qLabelText.querySelector('span');
-      qLabelText.textContent = t.qualityLabelText + ' ';
-      if (span) qLabelText.appendChild(span);
-    }
-    document.getElementById('downloadBtn').textContent = t.downloadBtn;
-    document.getElementById('resetBtn').textContent = t.resetBtn;
-    const navLinks = document.querySelectorAll('.links .nav');
-    navLinks.forEach((a,i)=>{ if(t.links[i]) a.textContent = t.links[i]; });
-    const footerSpans = document.querySelectorAll('footer span, footer a');
-    if(footerSpans[0]) footerSpans[0].textContent = t.footer[0];
-    if(footerSpans[1]) footerSpans[1].textContent = t.footer[1];
-
     // ---------- Image handling ----------
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
@@ -167,50 +107,34 @@
     let currentImage = null;
     let naturalW = 0, naturalH = 0;
 
-    // open file dialog on click
     dropZone.addEventListener('click', ()=> fileInput.click());
-
-    // drag & drop
     dropZone.addEventListener('dragover', (e)=>{ e.preventDefault(); dropZone.classList.add('drag'); });
-    dropZone.addEventListener('dragenter', (e)=>{ e.preventDefault(); dropZone.classList.add('drag'); });
     dropZone.addEventListener('dragleave', (e)=>{ e.preventDefault(); dropZone.classList.remove('drag'); });
     dropZone.addEventListener('drop', (e)=>{
-      e.preventDefault();
-      dropZone.classList.remove('drag');
+      e.preventDefault(); dropZone.classList.remove('drag');
       const files = e.dataTransfer.files;
       if(files && files[0]) handleFile(files[0]);
     });
 
-    // file input change
     fileInput.addEventListener('change', ()=>{ if(fileInput.files && fileInput.files[0]) handleFile(fileInput.files[0]); });
 
     function handleFile(file){
-      if(!file.type || !file.type.startsWith('image/')){
-        alert(lang === 'ar' ? 'الملف ليس صورة.' : 'File is not an image.');
-        return;
-      }
+      if(!file.type.startsWith('image/')){ alert('File is not an image.'); return; }
       const reader = new FileReader();
       reader.onload = (e)=>{
         const img = new Image();
-        img.onload = () => {
+        img.onload = ()=>{
           naturalW = img.naturalWidth; naturalH = img.naturalHeight;
           currentImage = img;
-
-          // default sizes: keep a reasonable default if image is big
           const defaultW = Math.min(800, naturalW);
           const defaultH = Math.round(defaultW * naturalH / naturalW);
-          widthInput.value = defaultW;
-          heightInput.value = defaultH;
-
+          widthInput.value = defaultW; heightInput.value = defaultH;
           originalSize.textContent = `${file.name} — ${naturalW}×${naturalH}px — ${(file.size/1024).toFixed(1)} KB`;
-
-          // preview
           preview.innerHTML = '';
           const imgEl = document.createElement('img');
           imgEl.src = e.target.result;
           imgEl.alt = file.name;
           preview.appendChild(imgEl);
-
           downloadBtn.disabled = false;
         };
         img.src = e.target.result;
@@ -218,47 +142,36 @@
       reader.readAsDataURL(file);
     }
 
-    // quality label
-    qualityRange.addEventListener('input', ()=>{ qualityLabel.textContent = Math.round(qualityRange.value*100) + '%'; });
+    qualityRange.addEventListener('input', ()=>{ qualityLabel.textContent = Math.round(qualityRange.value*100)+'%'; });
 
-    // keep aspect behaviour
     widthInput.addEventListener('input', ()=>{
-      if(keepAspect.checked && currentImage && naturalW && naturalH){
-        const w = Math.max(1, parseInt(widthInput.value) || 1);
+      if(keepAspect.checked && currentImage){
+        const w = parseInt(widthInput.value) || 1;
         const h = Math.round(w * naturalH / naturalW);
         heightInput.value = h;
       }
     });
 
     heightInput.addEventListener('input', ()=>{
-      if(keepAspect.checked && currentImage && naturalW && naturalH){
-        const h = Math.max(1, parseInt(heightInput.value) || 1);
+      if(keepAspect.checked && currentImage){
+        const h = parseInt(heightInput.value) || 1;
         const w = Math.round(h * naturalW / naturalH);
         widthInput.value = w;
       }
     });
 
-    // download / resize
     downloadBtn.addEventListener('click', ()=>{
       if(!currentImage) return;
-      const w = Math.max(1, parseInt(widthInput.value) || 1);
-      const h = Math.max(1, parseInt(heightInput.value) || 1);
+      const w = parseInt(widthInput.value) || 1;
+      const h = parseInt(heightInput.value) || 1;
       canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext('2d');
-      ctx.save();
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      // draw to exact size (stretches if needed). This is expected behaviour of a resizer.
       ctx.clearRect(0,0,w,h);
       ctx.drawImage(currentImage, 0, 0, w, h);
-      ctx.restore();
-
       const format = formatSelect.value;
       const quality = (format === 'image/jpeg' || format === 'image/webp') ? parseFloat(qualityRange.value) : undefined;
-
-      // toBlob is asynchronous and recommended for large images
       canvas.toBlob((blob)=>{
-        if(!blob){ alert(lang === 'ar' ? 'فشل إنشاء الصورة.' : 'Failed to create image.'); return; }
+        if(!blob){ alert('Failed to create image.'); return; }
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         const ext = format === 'image/png' ? 'png' : (format === 'image/jpeg' ? 'jpg' : 'webp');
@@ -271,7 +184,6 @@
       }, format, quality);
     });
 
-    // reset
     resetBtn.addEventListener('click', ()=>{
       fileInput.value = '';
       preview.innerHTML = '';
@@ -283,9 +195,9 @@
       qualityLabel.textContent = '90%';
     });
 
-    // accessibility: allow keyboard activate drop zone
     dropZone.setAttribute('tabindex', '0');
     dropZone.addEventListener('keypress', (e)=>{ if(e.key === 'Enter' || e.key === ' ') fileInput.click(); });
   </script>
 </body>
 </html>
+
