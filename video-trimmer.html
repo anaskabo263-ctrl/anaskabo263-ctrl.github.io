@@ -1,16 +1,17 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Video Trimmer</title>
   <style>
     body { font-family: sans-serif; padding: 20px; background: #f8f9fa; }
     .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
     video { width: 100%; margin-top: 10px; }
-    .controls { margin-top: 15px; display: flex; flex-direction: column; gap: 10px; }
-    label { display: flex; justify-content: space-between; align-items: center; }
-    input[type="number"] { width: 80px; margin-left: 10px; padding: 5px; }
+    .controls { margin-top: 10px; display: flex; flex-direction: column; gap: 10px; }
+    .controls label { display: flex; justify-content: space-between; align-items: center; }
+    input[type="range"] { width: 100%; }
     button { padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
     button:disabled { background: #aaa; cursor: not-allowed; }
     #log { white-space: pre-wrap; background: #eee; padding: 10px; margin-top: 10px; height: 120px; overflow: auto; }
@@ -19,27 +20,23 @@
 <body>
   <div class="container">
     <h1>✂ Video Trimmer</h1>
-
     <input type="file" id="fileInput" accept="video/*"><br>
     <video id="video" controls></video>
 
-    <div class="controls">
-      <label>
-        Start (seconds):
-        <input type="number" id="startTime" value="0" min="0" step="0.1">
-      </label>
-      <label>
-        End (seconds):
-        <input type="number" id="endTime" value="5" min="0" step="0.1">
-      </label>
-      <label>
-        Output File Name:
-        <input type="text" id="outputName" value="trimmed" placeholder="File name">
-      </label>
-      <button id="trimBtn" disabled>Trim & Download</button>
-    </div>
+```
+<div class="controls">
+  <label>Start: <span id="startLabel">0</span>s
+    <input type="range" id="startTime" value="0" min="0" max="0" step="0.1">
+  </label>
+  <label>End: <span id="endLabel">0</span>s
+    <input type="range" id="endTime" value="0" min="0" max="0" step="0.1">
+  </label>
+  <button id="trimBtn" disabled>Trim & Download</button>
+</div>
 
-    <div id="log"></div>
+<div id="log"></div>
+```
+
   </div>
 
   <script type="module">
@@ -50,7 +47,8 @@
     const video = document.getElementById('video');
     const startTime = document.getElementById('startTime');
     const endTime = document.getElementById('endTime');
-    const outputName = document.getElementById('outputName');
+    const startLabel = document.getElementById('startLabel');
+    const endLabel = document.getElementById('endLabel');
     const trimBtn = document.getElementById('trimBtn');
     const logElement = document.getElementById('log');
 
@@ -59,6 +57,8 @@
       logElement.scrollTop = logElement.scrollHeight;
     });
 
+    let videoDuration = 0;
+
     fileInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -66,7 +66,11 @@
       video.src = URL.createObjectURL(file);
 
       video.onloadedmetadata = () => {
-        endTime.max = video.duration.toFixed(1);
+        videoDuration = video.duration;
+        startTime.max = videoDuration.toFixed(1);
+        endTime.max = videoDuration.toFixed(1);
+        endTime.value = videoDuration.toFixed(1);
+        endLabel.textContent = videoDuration.toFixed(1);
       };
 
       if (!ffmpeg.isLoaded()) {
@@ -79,32 +83,44 @@
       trimBtn.disabled = false;
     });
 
+    startTime.addEventListener('input', () => {
+      startLabel.textContent = startTime.value;
+      if (parseFloat(startTime.value) > parseFloat(endTime.value)) {
+        endTime.value = startTime.value;
+        endLabel.textContent = endTime.value;
+      }
+    });
+
+    endTime.addEventListener('input', () => {
+      endLabel.textContent = endTime.value;
+      if (parseFloat(endTime.value) < parseFloat(startTime.value)) {
+        startTime.value = endTime.value;
+        startLabel.textContent = startTime.value;
+      }
+    });
+
     trimBtn.addEventListener('click', async () => {
       const start = parseFloat(startTime.value);
       const end = parseFloat(endTime.value);
       const duration = end - start;
-      const fileName = outputName.value.trim() || 'trimmed';
-
-      if (duration <= 0) {
-        alert('End time must be greater than start time');
-        return;
-      }
+      if (duration <= 0) return alert('End time must be greater than start time');
 
       logElement.textContent += `Trimming video from ${start}s to ${end}s...\n`;
+      await ffmpeg.run('-i', 'input.mp4', '-ss', `${start}`, '-t', `${duration}`, '-c', 'copy', 'output.mp4');
 
-      await ffmpeg.run('-i', 'input.mp4', '-ss', `${start}`, '-t', `${duration}`, '-c', 'copy', `${fileName}.mp4`);
-
-      const data = ffmpeg.FS('readFile', `${fileName}.mp4`);
+      const data = ffmpeg.FS('readFile', 'output.mp4');
       const blob = new Blob([data.buffer], { type: 'video/mp4' });
       const url = URL.createObjectURL(blob);
 
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${fileName}.mp4`;
+      a.download = 'trimmed.mp4';
       a.click();
 
       logElement.textContent += 'Trim finished, downloading...\n';
     });
   </script>
+
 </body>
 </html>
+
