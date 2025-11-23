@@ -19,29 +19,34 @@ body{
   padding:20px;
 }
 
+.container{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+  max-width:900px;
+  width:100%;
+  background:#fff;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.1);
+}
+
 header{
   text-align:center;
   margin-bottom:20px;
 }
 
-h1{color:#007bff;}
-p.description{
-  max-width:600px;
-  margin:8px auto 20px;
-  color:#555;
-  font-size:14px;
+header h1{
+  font-size:32px;
+  color:#007bff;
+  margin-bottom:10px;
 }
 
-.container{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  max-width:800px;
-  width:100%;
-  background:#fff;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.1);
+header p{
+  font-size:18px;
+  color:#333;
+  max-width:700px;
+  margin:0 auto;
 }
 
 img{
@@ -62,7 +67,7 @@ button{
   cursor:pointer;
   background:#007bff;
   color:#fff;
-  margin-top:8px;
+  margin-top:10px;
 }
 
 button:hover{
@@ -75,30 +80,33 @@ button:hover{
   margin-top:8px;
 }
 .size-inputs input{
-  width:100px;
+  width:120px;
+}
+.size-inputs label{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-size:14px;
 }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>📐 Image Crop Tool</h1>
-  <p class="description">
-    قص الصور بسهولة في المتصفح، يمكنك التحكم بالعرض والطول، وضبط التناسب إذا أردت. 
-    جميع العمليات تتم محلياً دون رفع الصورة لأي سيرفر.
-  </p>
-</header>
-
 <div class="container">
+  <header>
+    <h1>📐 Image Crop Tool</h1>
+    <p>
+      Crop your images quickly and easily in your browser. Specify width and height, keep aspect ratio if needed, and download instantly.
+    </p>
+  </header>
+
   <input type="file" id="inputImage" accept="image/*">
   <img id="image" style="display:none;">
 
   <div class="size-inputs">
     <input type="number" id="cropWidth" placeholder="Width (px)" min="1">
     <input type="number" id="cropHeight" placeholder="Height (px)" min="1">
-    <label style="display:flex;align-items:center;gap:4px;">
-      <input type="checkbox" id="keepAspect" checked> Keep Aspect
-    </label>
+    <label><input type="checkbox" id="keepAspect" checked> Keep Aspect Ratio</label>
   </div>
 
   <button id="cropBtn">📸 Crop & Download</button>
@@ -131,7 +139,7 @@ input.addEventListener('change', (e)=>{
 });
 
 cropBtn.addEventListener('click', ()=>{
-  if(!cropper) return alert("Upload an image first!");
+  if(!cropper) return alert("Please upload an image first!");
 
   let options = {};
   let width = parseInt(cropWidth.value);
@@ -140,7 +148,7 @@ cropBtn.addEventListener('click', ()=>{
   if(width>0) options.width = width;
   if(height>0) options.height = height;
   if(keepAspect.checked && width && height){
-    options.height = undefined; // let cropper keep aspect ratio
+    options.height = undefined; // keep aspect ratio
   }
 
   const canvas = cropper.getCroppedCanvas(options);
@@ -153,5 +161,7 @@ cropBtn.addEventListener('click', ()=>{
   a.click();
 });
 </script>
+
 </body>
 </html>
+
