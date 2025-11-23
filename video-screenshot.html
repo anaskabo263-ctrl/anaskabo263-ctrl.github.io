@@ -1,230 +1,158 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Video Screenshot Capture</title>
+<script>
+  // Elements
+  const video = document.getElementById('video');
+  const fileInput = document.getElementById('fileInput');
+  const urlInput = document.getElementById('urlInput');
+  const loadUrlBtn = document.getElementById('loadUrlBtn');
+  const playPauseBtn = document.getElementById('playPauseBtn');
+  const captureBtn = document.getElementById('captureBtn');
+  const captureAllBtn = document.getElementById('captureAllBtn');
+  const gallery = document.getElementById('gallery');
+  const imgFormat = document.getElementById('imgFormat');
+  const imgQuality = document.getElementById('imgQuality');
+  const outWidth = document.getElementById('outWidth');
+  const outHeight = document.getElementById('outHeight');
+  const keepAspect = document.getElementById('keepAspect');
+  const seqStart = document.getElementById('seqStart');
+  const seqEnd = document.getElementById('seqEnd');
+  const seqInterval = document.getElementById('seqInterval');
+  const downloadAllBtn = document.getElementById('downloadAll');
+  const clearAllBtn = document.getElementById('clearAll');
 
-  <style>
-    :root{
-      --accent:#0b5cff;
-      --bg:#f6f7fb;
-      --card:#ffffff;
-      --muted:#666;
+  let captures = [];
+  let seqTimer = null;
+
+  // FILE LOAD
+  fileInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith("video/")) return alert("Select a valid video.");
+    video.src = URL.createObjectURL(file);
+    video.load();
+    video.play().catch(()=>{});
+  });
+
+  // URL LOAD
+  loadUrlBtn.addEventListener("click", () => {
+    const url = urlInput.value.trim();
+    if (!url) return alert("Enter a video URL first.");
+    video.crossOrigin = "anonymous";
+    video.src = url;
+    video.load();
+    video.play().catch(()=>{});
+  });
+
+  // PLAY / PAUSE
+  playPauseBtn.addEventListener("click", () => {
+    if (video.paused) video.play();
+    else video.pause();
+  });
+
+  // SCREENSHOT
+  function takeScreenshot() {
+    const w = video.videoWidth;
+    const h = video.videoHeight;
+    if (!w || !h) return alert("Video not ready.");
+
+    let ow = parseInt(outWidth.value) || w;
+    let oh = parseInt(outHeight.value) || h;
+
+    if (keepAspect.checked) {
+      const ratio = w / h;
+      if (ow && !oh) oh = Math.round(ow / ratio);
+      if (oh && !ow) ow = Math.round(oh * ratio);
     }
 
-    body{
-      margin:0;
-      font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;
-      background: linear-gradient(180deg,#f0f4ff 0%, #f6f7fb 100%);
-      display:flex;
-      justify-content:center;
-      padding:28px;
-      color:#222;
-    }
+    const canvas = document.createElement("canvas");
+    canvas.width = ow;
+    canvas.height = oh;
 
-    .wrap{
-      width:100%;
-      max-width:1100px;
-      background:var(--card);
-      border-radius:14px;
-      box-shadow:0 10px 30px rgba(20,30,60,0.08);
-      padding:20px;
-    }
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, ow, oh);
 
-    header{
-      display:flex;
-      align-items:center;
-      gap:16px;
-      margin-bottom:12px;
-    }
-    header h1{margin:0;font-size:20px;color:var(--accent)}
-    header p{margin:0;color:var(--muted);font-size:13px}
+    const quality = imgFormat.value === "jpeg"
+      ? imgQuality.value / 100
+      : 1.0;
 
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 360px;
-      gap:18px;
-    }
-    @media(max-width:980px){ .grid{grid-template-columns:1fr} }
+    const dataUrl = canvas.toDataURL("image/" + imgFormat.value, quality);
 
-    /* left: player & controls */
-    .player-card{
-      background:linear-gradient(180deg,#fff,#fbfdff);
-      border-radius:12px;padding:14px;border:1px solid rgba(11,92,255,0.06);
-    }
+    addToGallery(dataUrl);
+  }
 
-    .video-area{
-      background:#000;border-radius:10px;overflow:hidden;
-      display:flex;align-items:center;justify-content:center;
-      height:420px;
-      position:relative;
-    }
-    video{
-      max-width:100%; max-height:100%; background:#000; display:block;
-    }
+  captureBtn.addEventListener("click", takeScreenshot);
 
-    .upload-row{
-      display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;
-    }
-    .input, .btn {
-      padding:10px 12px;border-radius:8px;border:1px solid #dfe7ff;background:#fff;
-      font-size:14px;
-    }
-    .input[type="text"]{flex:1;min-width:160px}
-    .btn{cursor:pointer;background:var(--accent);color:#fff;border:none;box-shadow:0 6px 18px rgba(11,92,255,0.15)}
-    .btn.secondary{background:#fff;color:var(--accent);border:1px solid rgba(11,92,255,0.12);box-shadow:none}
+  // CAPTURE SEQUENCE
+  captureAllBtn.addEventListener("click", () => {
+    const start = Number(seqStart.value);
+    const end = Number(seqEnd.value);
+    const interval = Number(seqInterval.value);
 
-    .controls{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
-    .controls .small{font-size:13px;color:var(--muted)}
+    if (start >= end)
+      return alert("Start time must be less than end time.");
 
-    /* right: options & gallery */
-    .side{
-      display:flex;flex-direction:column;gap:12px;
-    }
-    .card{
-      background:#fff;border-radius:10px;padding:12px;border:1px solid rgba(0,0,0,0.04);
-    }
-    .card h3{margin:0 0 8px 0;font-size:15px;color:var(--accent)}
-    .field{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-    label{font-size:13px;color:var(--muted);min-width:120px}
+    video.currentTime = start;
 
-    .gallery{
-      display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;
-      margin-top:6px;
-    }
-    .thumb{position:relative;border-radius:8px;overflow:hidden;border:1px solid rgba(0,0,0,0.06)}
-    .thumb img{display:block;width:100%;height:100%;object-fit:cover}
-    .thumb .tools{position:absolute;right:6px;top:6px;display:flex;gap:6px}
-    .icon-btn{background:rgba(0,0,0,0.5);color:#fff;padding:6px;border-radius:6px;font-size:12px;cursor:pointer;border:none}
+    seqTimer = setInterval(() => {
+      if (video.currentTime >= end) {
+        clearInterval(seqTimer);
+        seqTimer = null;
+        return;
+      }
+      takeScreenshot();
+      video.currentTime += interval;
+    }, interval * 1000);
+  });
 
-    .hint{font-size:12px;color:var(--muted);margin-top:6px}
-
-    footer.small{margin-top:10px;color:var(--muted);font-size:13px}
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <header>
-      <div>
-        <h1>🎬 Video Screenshot Capture</h1>
-        <p>Play a video (file or URL) and take instant screenshots. Images processed locally — no upload.</p>
+  // Add to gallery
+  function addToGallery(dataUrl) {
+    const div = document.createElement("div");
+    div.className = "thumb";
+    div.innerHTML = `
+      <img src="${dataUrl}">
+      <div class="tools">
+        <button class="icon-btn" onclick="downloadImage('${dataUrl}')">⬇</button>
+        <button class="icon-btn" onclick="this.parentElement.parentElement.remove()">🗑</button>
       </div>
-    </header>
+    `;
+    gallery.appendChild(div);
+  }
 
-    <div class="grid">
-      <!-- LEFT: player -->
-      <div class="player-card">
-        <div class="video-area" id="videoArea">
-          <video id="video" controls crossorigin="anonymous" playsinline></video>
-        </div>
+  // Download one image
+  window.downloadImage = function(dataUrl) {
+    const a = document.createElement("a");
+    a.href = dataUrl;
+    a.download = "screenshot.png";
+    a.click();
+  };
 
-        <div class="upload-row">
-          <input id="fileInput" class="input" type="file" accept="video/*">
-          <input id="urlInput" class="input" type="text" placeholder="Or paste video URL (mp4/webm) — CORS required">
-          <button id="loadUrlBtn" class="btn secondary">Load URL</button>
-          <button id="playPauseBtn" class="btn">Play / Pause</button>
-        </div>
+  // CLEAR
+  clearAllBtn.addEventListener("click", () => {
+    gallery.innerHTML = "";
+  });
 
-        <div class="controls">
-          <button id="captureBtn" class="btn">📸 Take Screenshot</button>
-          <button id="captureAllBtn" class="btn secondary">⏱ Capture Sequence</button>
+  // DOWNLOAD ALL ZIP
+  downloadAllBtn.addEventListener("click", async () => {
+    const imgs = gallery.querySelectorAll("img");
+    if (!imgs.length) return alert("No images to download.");
 
-          <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-            <div class="small">Format</div>
-            <select id="imgFormat" class="input" style="width:90px">
-              <option value="png">PNG</option>
-              <option value="jpeg">JPG</option>
-            </select>
+    const zip = new JSZip();
+    let i = 1;
 
-            <div class="small">Quality</div>
-            <input id="imgQuality" type="number" class="input" min="10" max="100" value="92" style="width:80px">
-          </div>
-        </div>
-
-        <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">
-          <div class="small">Width (px, 0 = original)</div>
-          <input id="outWidth" type="number" class="input" min="0" value="0" style="width:110px">
-          <div class="small">Height (px, 0 = original)</div>
-          <input id="outHeight" type="number" class="input" min="0" value="0" style="width:110px">
-          <label style="display:flex;align-items:center;gap:6px;margin-left:8px"><input id="keepAspect" type="checkbox" checked> Keep aspect</label>
-        </div>
-
-        <div class="hint">Tip: For remote URLs, the server must allow CORS (Access-Control-Allow-Origin) for screenshots to work.</div>
-      </div>
-
-      <!-- RIGHT: options & gallery -->
-      <div class="side">
-        <div class="card">
-          <h3>Capture Sequence</h3>
-          <div class="field"><label>Start (s)</label><input id="seqStart" type="number" class="input" min="0" value="0" style="flex:1"></div>
-          <div class="field"><label>End (s)</label><input id="seqEnd" type="number" class="input" min="0" value="5" style="flex:1"></div>
-          <div class="field"><label>Interval (s)</label><input id="seqInterval" type="number" class="input" min="0.1" step="0.1" value="1" style="flex:1"></div>
-          <div class="hint">Press "Capture Sequence" to automatically capture frames from start to end every interval seconds.</div>
-        </div>
-
-        <div class="card">
-          <h3>Captured Images</h3>
-          <div id="gallery" class="gallery"></div>
-          <div style="display:flex;gap:8px;margin-top:10px">
-            <button id="downloadAll" class="btn secondary">⬇ Download All (zip)</button>
-            <button id="clearAll" class="btn secondary">🗑 Clear</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>Notes</h3>
-          <p style="margin:0;color:var(--muted);font-size:13px">
-            All processing happens in your browser. For remote videos, screenshots only work if the video server allows cross-origin access.
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <footer class="small">Keyboard: Space = Play/Pause • S = Screenshot</footer>
-  </div>
-
-  <!-- JS -->
-  <script>
-    // Elements
-    const video = document.getElementById('video');
-    const fileInput = document.getElementById('fileInput');
-    const urlInput = document.getElementById('urlInput');
-    const loadUrlBtn = document.getElementById('loadUrlBtn');
-    const playPauseBtn = document.getElementById('playPauseBtn');
-    const captureBtn = document.getElementById('captureBtn');
-    const captureAllBtn = document.getElementById('captureAllBtn');
-    const gallery = document.getElementById('gallery');
-    const imgFormat = document.getElementById('imgFormat');
-    const imgQuality = document.getElementById('imgQuality');
-    const outWidth = document.getElementById('outWidth');
-    const outHeight = document.getElementById('outHeight');
-    const keepAspect = document.getElementById('keepAspect');
-    const seqStart = document.getElementById('seqStart');
-    const seqEnd = document.getElementById('seqEnd');
-    const seqInterval = document.getElementById('seqInterval');
-    const downloadAllBtn = document.getElementById('downloadAll');
-    const clearAllBtn = document.getElementById('clearAll');
-
-    let captures = []; // {dataUrl, blob, name}
-    let seqTimer = null;
-
-    // Helpers
-    function setVideoSourceFromFile(file){
-      const url = URL.createObjectURL(file);
-      video.src = url;
-      video.load();
-      video.play().catch(()=>{});
+    for (let img of imgs) {
+      const dataUrl = img.src;
+      const base64 = dataUrl.split(",")[1];
+      zip.file(`capture_${i}.png`, base64, { base64: true });
+      i++;
     }
 
-    fileInput.addEventListener('change', (e)=>{
-      const f = e.target.files && e.target.files[0];
-      if(!f) return;
-      if(!f.type.startsWith('video/')) { alert('Please select a video file.'); return; }
-      setVideoSourceFromFile(f);
-    });
+    const content = await zip.generateAsync({ type: "blob" });
 
-    loadUrlBtn.addEventListener('click', ()=>{
-      const url = urlInput.value.trim();
-      if(!url) return alert('Paste a video URL first.');
-      // caution: crossOrigin is
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(content);
+    a.download = "screenshots.zip";
+    a.click();
+  });
+</script>
+
+<!-- ZIP LIB -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
