@@ -4,9 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="google-adsense-account" content="ca-pub-9629738997503614">
   <title>Video Trimmer</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     body { font-family: sans-serif; padding: 20px; background: #f8f9fa; }
     .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -54,18 +52,19 @@
       logElement.scrollTop = logElement.scrollHeight;
     });
 
-    let videoDuration = 0;
-
     fileInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
       const videoURL = URL.createObjectURL(file);
       video.src = videoURL;
-      video.load(); // ← لضمان تشغيل الفيديو فورًا
+      video.load();
+
       video.onloadedmetadata = () => {
-        videoDuration = video.duration;
-        endTime.value = videoDuration.toFixed(1);
+        endTime.value = video.duration.toFixed(1);
+        video.play().catch(err => {
+          console.warn("Video autoplay blocked by browser", err);
+        });
       };
 
       if (!ffmpeg.isLoaded()) {
@@ -99,6 +98,9 @@
       logElement.textContent += 'Trim finished, downloading...\n';
     });
   </script>
+
+</body>
+</html>
 
 </body>
 </html>
