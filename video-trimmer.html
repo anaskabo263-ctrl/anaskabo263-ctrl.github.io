@@ -23,7 +23,7 @@
   <div class="container">
     <input type="file" id="fileInput" accept="video/*"><br>
     <video id="video" controls></video>
-    <button id="playBtn" disabled>Play Video</button>
+    <button id="playBtn" disabled>Play/Pause Video</button>
 
 ```
 <div class="controls">
@@ -37,10 +37,7 @@
 
   </div>
 
-  <script type="module">
-    import { createFFmpeg, fetchFile } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.8/dist/ffmpeg.min.js';
-
-    const ffmpeg = createFFmpeg({ log: true });
+  <script>
     const fileInput = document.getElementById('fileInput');
     const video = document.getElementById('video');
     const playBtn = document.getElementById('playBtn');
@@ -49,32 +46,21 @@
     const trimBtn = document.getElementById('trimBtn');
     const logElement = document.getElementById('log');
 
-    ffmpeg.setLogger(({ type, message }) => {
-      logElement.textContent += `[${type}] ${message}\n`;
-      logElement.scrollTop = logElement.scrollHeight;
-    });
-
-    fileInput.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
       if (!file) return;
 
-      const videoURL = URL.createObjectURL(file);
-      video.src = videoURL;
+      const url = URL.createObjectURL(file);
+      video.src = url;
       video.load();
+      playBtn.disabled = false;
+      trimBtn.disabled = false;
 
       video.onloadedmetadata = () => {
         endTime.value = video.duration.toFixed(1);
-        playBtn.disabled = false;
+        startTime.max = video.duration.toFixed(1);
+        endTime.max = video.duration.toFixed(1);
       };
-
-      if (!ffmpeg.isLoaded()) {
-        logElement.textContent += 'Loading FFmpeg...\n';
-        await ffmpeg.load();
-        logElement.textContent += 'FFmpeg loaded\n';
-      }
-
-      await ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(file));
-      trimBtn.disabled = false;
     });
 
     playBtn.addEventListener('click', () => {
@@ -85,25 +71,8 @@
       }
     });
 
-    trimBtn.addEventListener('click', async () => {
-      const start = parseFloat(startTime.value);
-      const end = parseFloat(endTime.value);
-      const duration = end - start;
-      if (duration <= 0) return alert('End time must be greater than start time');
-
-      logElement.textContent += `Trimming video from ${start}s to ${end}s...\n`;
-      await ffmpeg.run('-i', 'input.mp4', '-ss', `${start}`, '-t', `${duration}`, '-c', 'copy', 'output.mp4');
-
-      const data = ffmpeg.FS('readFile', 'output.mp4');
-      const blob = new Blob([data.buffer], { type: 'video/mp4' });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'trimmed.mp4';
-      a.click();
-
-      logElement.textContent += 'Trim finished, downloading...\n';
+    trimBtn.addEventListener('click', () => {
+      alert('تم تفعيل مشغل الفيديو، لكن قص الفيديو يتطلب FFmpeg في متصفح يدعم Module أو عبر خادم محلي.');
     });
   </script>
 
