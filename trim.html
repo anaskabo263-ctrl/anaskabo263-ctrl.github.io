@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF‑8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video Trimmer (FFmpeg.wasm)</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f8f9fa; }
+    .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    video { width: 100%; margin-top: 10px; }
+    .controls { margin-top: 10px; }
+    .controls input, .controls button { margin-right: 8px; padding: 8px; }
+    #log { white-space: pre-wrap; background: #eee; padding: 10px; margin-top: 10px; height: 120px; overflow: auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>✂ Video Trimmer</h1>
+    <input type="file" id="fileInput" accept="video/*"><br>
+    <video id="video" controls></video>
+
+    <div class="controls">
+      <label>Start (s): <input type="number" id="startTime" value="0" min="0"></label>
+      <label>End (s): <input type="number" id="endTime" value="5" min="0"></label>
+      <button id="trimBtn" disabled>Trim & Download</button>
+    </div>
+
+    <div id="log"></div>
+  </div>
+
+  <script type="module">
+    import { FFmpeg } from 'https://cdn.jsdelivr.net/npm/@ffmpeg.wasm/main/dist/ffmpeg.mjs';
+    import { fetchFile } from 'https://cdn.jsdelivr.net/npm/@ffmpeg.wasm/util/dist/index.mjs';
+
+    const ffmpeg = FFmpeg.createFFmpeg({ log: true });
+    const fileInput = document.getElementById('fileInput');
+    const video = document.getElementById('video');
+    const startTime = document.getElementById('startTime');
+    const endTime = document.getElementById('endTime');
+    const trimBtn = document.getElementById('trimBtn');
+    const logElement = document.getElementById('log');
+
+    ffmpeg.setLogger(({ type, message }) => {
+      logElement.textContent += `[${type}] ${message}\n`;
+    });
+
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      video.src = url;
+
+      await ffmpeg.load();
+      logElement.textContent += 'FFmpeg loaded\n';
+
+      const data = await fetchFile(file);
+      await ffmpeg.writeFile('input.mp4', data);
+
+      trimBtn.disabled = false;
+    });
+
+    trimBtn.addEventListener('click', async () => {
+      const start = parseFloat(startTime.value);
+      const end = parseFloat(endTime.value);
+      const duration = end - start;
+      if (duration <= 0) {
+        alert('End time must be greater than start time');
+        return;
+      }
+
+      // أمر ffmpeg لقص المقطع
+      await ffmpeg.run(
+        '-i', 'input.mp4',
+        '-ss', `${start}`,
+        '-t', `${duration}`,
+        '-c', 'copy',
+        'output.mp4'
+      );
+
+      const data = ffmpeg.FS('readFile', 'output.mp4');
+      const blob = new Blob([data.buffer], { type: 'video/mp4' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'trimmed.mp4';
+      a.click();
+
+      logElement.textContent += 'Trim finished, downloading...\n';
+    });
+  </script>
+</body>
+</html>
