@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF‑8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Video Trimmer (FFmpeg.wasm)</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Video Trimmer</title>
   <style>
     body { font-family: sans-serif; padding: 20px; background: #f8f9fa; }
     .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -29,10 +29,9 @@
   </div>
 
   <script type="module">
-    import { FFmpeg } from 'https://cdn.jsdelivr.net/npm/@ffmpeg.wasm/main/dist/ffmpeg.mjs';
-    import { fetchFile } from 'https://cdn.jsdelivr.net/npm/@ffmpeg.wasm/util/dist/index.mjs';
+    import { createFFmpeg, fetchFile } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.8/dist/ffmpeg.min.js';
 
-    const ffmpeg = FFmpeg.createFFmpeg({ log: true });
+    const ffmpeg = createFFmpeg({ log: true });
     const fileInput = document.getElementById('fileInput');
     const video = document.getElementById('video');
     const startTime = document.getElementById('startTime');
@@ -47,15 +46,15 @@
     fileInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      const url = URL.createObjectURL(file);
-      video.src = url;
+      video.src = URL.createObjectURL(file);
 
-      await ffmpeg.load();
-      logElement.textContent += 'FFmpeg loaded\n';
+      if (!ffmpeg.isLoaded()) {
+        logElement.textContent += 'Loading FFmpeg...\n';
+        await ffmpeg.load();
+        logElement.textContent += 'FFmpeg loaded\n';
+      }
 
-      const data = await fetchFile(file);
-      await ffmpeg.writeFile('input.mp4', data);
-
+      await ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(file));
       trimBtn.disabled = false;
     });
 
@@ -63,19 +62,10 @@
       const start = parseFloat(startTime.value);
       const end = parseFloat(endTime.value);
       const duration = end - start;
-      if (duration <= 0) {
-        alert('End time must be greater than start time');
-        return;
-      }
+      if (duration <= 0) return alert('End time must be greater than start time');
 
-      // أمر ffmpeg لقص المقطع
-      await ffmpeg.run(
-        '-i', 'input.mp4',
-        '-ss', `${start}`,
-        '-t', `${duration}`,
-        '-c', 'copy',
-        'output.mp4'
-      );
+      logElement.textContent += 'Trimming video...\n';
+      await ffmpeg.run('-i', 'input.mp4', '-ss', `${start}`, '-t', `${duration}`, '-c', 'copy', 'output.mp4');
 
       const data = ffmpeg.FS('readFile', 'output.mp4');
       const blob = new Blob([data.buffer], { type: 'video/mp4' });
