@@ -23,6 +23,7 @@
   <div class="container">
     <input type="file" id="fileInput" accept="video/*"><br>
     <video id="video" controls></video>
+    <button id="playBtn" disabled>Play Video</button>
 
 ```
 <div class="controls">
@@ -42,6 +43,7 @@
     const ffmpeg = createFFmpeg({ log: true });
     const fileInput = document.getElementById('fileInput');
     const video = document.getElementById('video');
+    const playBtn = document.getElementById('playBtn');
     const startTime = document.getElementById('startTime');
     const endTime = document.getElementById('endTime');
     const trimBtn = document.getElementById('trimBtn');
@@ -62,9 +64,7 @@
 
       video.onloadedmetadata = () => {
         endTime.value = video.duration.toFixed(1);
-        video.play().catch(err => {
-          console.warn("Video autoplay blocked by browser", err);
-        });
+        playBtn.disabled = false;
       };
 
       if (!ffmpeg.isLoaded()) {
@@ -75,6 +75,14 @@
 
       await ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(file));
       trimBtn.disabled = false;
+    });
+
+    playBtn.addEventListener('click', () => {
+      if (video.paused) {
+        video.play();
+      } else {
+        video.pause();
+      }
     });
 
     trimBtn.addEventListener('click', async () => {
@@ -98,9 +106,6 @@
       logElement.textContent += 'Trim finished, downloading...\n';
     });
   </script>
-
-</body>
-</html>
 
 </body>
 </html>
