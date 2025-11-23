@@ -25,6 +25,12 @@ header{
 }
 
 h1{color:#007bff;}
+p.description{
+  max-width:600px;
+  margin:8px auto 20px;
+  color:#555;
+  font-size:14px;
+}
 
 .container{
   display:flex;
@@ -44,12 +50,16 @@ img{
   border-radius:10px;
 }
 
-button{
-  padding:10px 16px;
-  border:none;
+input, button{
+  padding:10px 12px;
   border-radius:8px;
-  cursor:pointer;
+  border:1px solid #dfe7ff;
   font-size:14px;
+}
+
+button{
+  border:none;
+  cursor:pointer;
   background:#007bff;
   color:#fff;
   margin-top:8px;
@@ -58,18 +68,39 @@ button{
 button:hover{
   background:#0056b3;
 }
+
+.size-inputs{
+  display:flex;
+  gap:10px;
+  margin-top:8px;
+}
+.size-inputs input{
+  width:100px;
+}
 </style>
 </head>
 <body>
 
 <header>
   <h1>📐 Image Crop Tool</h1>
-  <p>Upload an image and crop it as you like</p>
+  <p class="description">
+    قص الصور بسهولة في المتصفح، يمكنك التحكم بالعرض والطول، وضبط التناسب إذا أردت. 
+    جميع العمليات تتم محلياً دون رفع الصورة لأي سيرفر.
+  </p>
 </header>
 
 <div class="container">
   <input type="file" id="inputImage" accept="image/*">
   <img id="image" style="display:none;">
+
+  <div class="size-inputs">
+    <input type="number" id="cropWidth" placeholder="Width (px)" min="1">
+    <input type="number" id="cropHeight" placeholder="Height (px)" min="1">
+    <label style="display:flex;align-items:center;gap:4px;">
+      <input type="checkbox" id="keepAspect" checked> Keep Aspect
+    </label>
+  </div>
+
   <button id="cropBtn">📸 Crop & Download</button>
 </div>
 
@@ -80,6 +111,9 @@ let cropper;
 const image = document.getElementById('image');
 const input = document.getElementById('inputImage');
 const cropBtn = document.getElementById('cropBtn');
+const cropWidth = document.getElementById('cropWidth');
+const cropHeight = document.getElementById('cropHeight');
+const keepAspect = document.getElementById('keepAspect');
 
 input.addEventListener('change', (e)=>{
   const file = e.target.files[0];
@@ -90,7 +124,7 @@ input.addEventListener('change', (e)=>{
 
   if(cropper) cropper.destroy();
   cropper = new Cropper(image, {
-    aspectRatio: NaN, // free ratio
+    aspectRatio: NaN,
     viewMode: 1,
     autoCropArea: 1,
   });
@@ -98,7 +132,20 @@ input.addEventListener('change', (e)=>{
 
 cropBtn.addEventListener('click', ()=>{
   if(!cropper) return alert("Upload an image first!");
-  const canvas = cropper.getCroppedCanvas();
+
+  let options = {};
+  let width = parseInt(cropWidth.value);
+  let height = parseInt(cropHeight.value);
+
+  if(width>0) options.width = width;
+  if(height>0) options.height = height;
+  if(keepAspect.checked && width && height){
+    options.height = undefined; // let cropper keep aspect ratio
+  }
+
+  const canvas = cropper.getCroppedCanvas(options);
+  if(!canvas) return alert("Cropping failed!");
+
   const url = canvas.toDataURL('image/png');
   const a = document.createElement('a');
   a.href = url;
@@ -108,4 +155,3 @@ cropBtn.addEventListener('click', ()=>{
 </script>
 </body>
 </html>
-
