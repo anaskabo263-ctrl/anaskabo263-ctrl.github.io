@@ -2,168 +2,196 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Crop Images</title>
-
-  <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-CECGX11WVH"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-CECGX11WVH');
-  </script>
-
-  <!-- AdSense -->
-  <meta name="google-adsense-account" content="ca-pub-9629738997503614">
-
-  <!-- Cropper.js -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Image Format Converter</title>
 
   <style>
-    body{margin:0;font-family:sans-serif;background:#f8f9fa;direction:ltr;color:#333}
-    header{background:#007bff;color:#fff;padding:14px;text-align:center;font-size:1.3rem}
-    .container{max-width:980px;margin:18px auto;background:#fff;padding:14px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
-    .info{background:#f1f9ff;border:1px solid #cce5ff;padding:12px;border-radius:8px;margin-bottom:12px}
-    .buttons{text-align:center;margin:12px 0}
-    .btn{background:#007bff;color:#fff;padding:10px 14px;border:none;border-radius:8px;cursor:pointer;margin:6px}
-    .btn:disabled{background:#ccc;cursor:not-allowed}
-    .img-container{text-align:center;margin-top:10px}
-    img#image{max-width:100%;display:block;margin:0 auto;max-height:520px;border-radius:8px}
-    .links{margin-top:18px;text-align:center}
-    .links a{display:inline-block;margin:6px;padding:8px 12px;border:1px solid #007bff;color:#007bff;border-radius:8px;text-decoration:none}
-    .links a:hover{background:#007bff;color:#fff}
-    footer{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;color:#666;font-size:14px;margin-top:12px;}
+    body {
+      font-family: "Segoe UI", Tahoma, Arial;
+      background: linear-gradient(135deg, #eef3ff, #d9e4ff);
+      margin: 0;
+      padding: 20px;
+    }
+
+    .card {
+      max-width: 800px;
+      background: #ffffffee;
+      padding: 25px;
+      border-radius: 18px;
+      margin: 0 auto;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+      backdrop-filter: blur(6px);
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 0;
+      color: #004be0;
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    /* ======= INFO BOX ======= */
+    .info-box {
+      background: #f0f5ff;
+      border-left: 6px solid #004be0;
+      padding: 20px;
+      border-radius: 14px;
+      margin-bottom: 30px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .info-title {
+      font-size: 22px;
+      color: #004be0;
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    .info-box p {
+      color: #333;
+      font-size: 15px;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .info-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 15px;
+    }
+
+    .info-list li {
+      font-size: 15px;
+      padding: 6px 0;
+      color: #444;
+    }
+
+    /* ===== UPLOAD AREA ===== */
+    .upload-area {
+      border: 2px dashed #6690ff;
+      background: #f7faff;
+      text-align: center;
+      padding: 30px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .upload-area:hover {
+      background: #eaf0ff;
+      border-color: #004be0;
+    }
+
+    select, input[type="number"], button {
+      width: 100%;
+      padding: 12px;
+      margin: 12px 0;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+      transition: 0.2s;
+    }
+
+    button {
+      background: #004be0;
+      color: white;
+      font-weight: 600;
+      border: none;
+      box-shadow: 0 5px 15px rgba(0,75,224,0.3);
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #003bb4;
+    }
   </style>
 </head>
+
 <body>
 
-<header>✂️ Crop Tool</header>
+  <div class="card">
+    <h1>🔄 Image Format Converter</h1>
 
-<div class="container">
+    <!-- ⭐ BEAUTIFUL INFO SECTION -->
+    <div class="info-box">
+      <div class="info-title">✨ What This Tool Does</div>
 
-  <!-- ⭐⭐⭐ شرح احترافي مضاف هنا ⭐⭐⭐ -->
-  <div style="
-    max-width:850px;
-    margin:0 auto 25px;
-    padding:16px 20px;
-    background:#eef5ff;
-    border-left:5px solid #0b5cff;
-    border-radius:10px;
-    color:#333;
-    font-size:15px;
-    line-height:1.7;
-    text-align:center;
-    box-shadow:0 4px 12px rgba(0,0,0,0.05);
-  ">
-    <h2 style="margin-top:0; color:#0b5cff; font-size:20px;">
-      ⭐ What This Crop Tool Does
-    </h2>
+      <p>
+        A fast and secure <strong>online image converter</strong> that lets you convert, resize, optimize,
+        and compress your images instantly. Supports <strong>PNG</strong>, <strong>JPG</strong>, and <strong>WEBP</strong>.
+        All processing happens offline inside your browser — your files never leave your device.
+      </p>
 
-    <p style="margin:0; padding:0 5px;">
-      This easy and fast <strong>online image cropper</strong> allows you to trim, cut, and resize images 
-      instantly. Perfect for profile pictures, thumbnails, product photos, and social media posts. 
-      No uploads, no servers — all processing happens locally in your browser for maximum privacy and speed.
-    </p>
+      <ul class="info-list">
+        <li>✔ Convert images between PNG, JPG, WEBP</li>
+        <li>✔ Resize images (optional)</li>
+        <li>✔ Adjust quality to compress file size</li>
+        <li>✔ Fully private — no uploads or servers</li>
+      </ul>
+    </div>
 
-    <ul style="
-      list-style:none;
-      padding:0;
-      margin:12px 0 0;
-      text-align:center;
-      font-size:14px;
-      color:#444;
-    ">
-      <li>✂️ Freeform and adjustable cropping</li>
-      <li>📐 Any aspect ratio (1:1, 4:5, 16:9, custom)</li>
-      <li>⚡ 100% fast, secure, and offline processing</li>
-      <li>🖼️ Ideal for social media, editing, and optimization</li>
-    </ul>
-  </div>
-  <!-- ⭐⭐⭐ نهاية الشرح ⭐⭐⭐ -->
+    <!-- UPLOAD AREA -->
+    <label class="upload-area">
+      <strong>Click to upload or drag & drop an image</strong>
+      <input type="file" id="imageInput" accept="image/*" hidden />
+    </label>
 
-  <div class="info">
-    <strong>How to use:</strong>
-    <ol style="margin:6px 0;padding-inline-start:18px">
-      <li>Click "Choose Image" to upload an image from your device.</li>
-      <li>Adjust the crop frame as you want.</li>
-      <li>Click "Crop & Download" to save the result.</li>
-    </ol>
+    <label>Output Format:</label>
+    <select id="format">
+      <option value="png">PNG</option>
+      <option value="jpeg">JPG</option>
+      <option value="webp">WEBP</option>
+    </select>
+
+    <label>Quality (for JPG/WEBP):</label>
+    <input type="number" id="quality" min="1" max="100" value="90">
+
+    <button onclick="convertImage()">Convert Image</button>
+
+    <a id="downloadLink" style="display:none; margin-top:15px; font-size:16px; text-align:center; display:block;">Download Converted Image</a>
   </div>
 
-  <div class="buttons">
-    <label class="btn" for="fileInput">📁 Choose Image</label>
-    <input id="fileInput" type="file" accept="image/*" style="display:none">
-    <button id="cropBtn" class="btn" disabled>📥 Crop & Download</button>
-  </div>
+  <script>
+    function convertImage() {
+      const fileInput = document.getElementById("imageInput").files[0];
+      const format = document.getElementById("format").value;
+      const quality = document.getElementById("quality").value / 100;
 
-  <div class="img-container">
-    <img id="image" src="" alt="Upload an image to crop">
-  </div>
+      if (!fileInput) {
+        alert("Please upload an image first.");
+        return;
+      }
 
-  <div class="links">
-    <a href="./index.html">🏠 Home</a>
-    <a href="./resize.html">📐 Resize</a>
-    <a href="./convert.html">🔄 Convert</a>
-    <a href="./features.html">⭐ Features</a>
-    <a href="./privacy.html">🔒 Privacy Policy</a>
-  </div>
-</div>
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const img = new Image();
+        img.src = event.target.result;
 
-<footer>
-  <span>© 2025 All rights reserved</span>
-  <span>|</span>
-  <a href="./privacy.html" style="color:#0b5cff;text-decoration:none;">Privacy Policy</a>
-</footer>
+        img.onload = function () {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
 
-<script>
-  const fileInput = document.getElementById('fileInput');
-  const cropBtn = document.getElementById('cropBtn');
-  const image = document.getElementById('image');
-  let cropper;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
 
-  fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if(!file) return;
-    if(!file.type.startsWith('image/')) { alert("Please select an image file."); return; }
+          const dataURL = canvas.toDataURL("image/" + format, quality);
 
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      image.src = ev.target.result;
-      if(cropper) cropper.destroy();
-      cropper = new Cropper(image, {
-        aspectRatio: NaN,
-        viewMode: 1,
-        movable: true,
-        zoomable: true,
-        scalable: true,
-        rotatable: true,
-      });
-      cropBtn.disabled = false;
-    };
-    reader.readAsDataURL(file);
-  });
-
-  cropBtn.addEventListener('click', ()=>{
-    if(!cropper) return alert("Please choose an image first.");
-    const croppedCanvas = cropper.getCroppedCanvas({ maxWidth:4096, maxHeight:4096 });
-    if(!croppedCanvas) return alert('Failed to crop');
-
-    croppedCanvas.toBlob((blob)=>{
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'cropped-image.png';
-      document.body.appendChild(link);
-      link.click();
-      URL.revokeObjectURL(link.href);
-      link.remove();
-    });
-  });
-
-  ['dragenter','dragover','dragleave','drop'].forEach(evt=>window.addEventListener(evt,e=>e.preventDefault()));
-</script>
+          const link = document.getElementById("downloadLink");
+          link.href = dataURL;
+          link.download = "converted-image." + format;
+          link.style.display = "block";
+          link.textContent = "⬇ Download Converted Image";
+        };
+      };
+      reader.readAsDataURL(fileInput);
+    }
+  </script>
 
 </body>
 </html>
+
 
