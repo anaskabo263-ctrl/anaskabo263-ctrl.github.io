@@ -4,33 +4,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="google-adsense-account" content="ca-pub-9629738997503614">
   <title>Video Trimmer</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     body { font-family: sans-serif; padding: 20px; background: #f8f9fa; }
     .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
     video { width: 100%; margin-top: 10px; }
     .controls { margin-top: 10px; display: flex; flex-direction: column; gap: 10px; }
     .controls label { display: flex; justify-content: space-between; align-items: center; }
-    input[type="range"] { width: 100%; }
+    input[type="number"] { width: 70px; padding: 6px; }
     button { padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
     button:disabled { background: #aaa; cursor: not-allowed; }
     #log { white-space: pre-wrap; background: #eee; padding: 10px; margin-top: 10px; height: 120px; overflow: auto; }
+    header { text-align: center; font-size: 1.6rem; margin-bottom: 20px; }
   </style>
 </head>
 <body>
+  <header>✂ Video Trimmer Tool</header>
   <div class="container">
-    <h1>✂ Video Trimmer</h1>
     <input type="file" id="fileInput" accept="video/*"><br>
     <video id="video" controls></video>
 
 ```
 <div class="controls">
-  <label>Start: <span id="startLabel">0</span>s
-    <input type="range" id="startTime" value="0" min="0" max="0" step="0.1">
-  </label>
-  <label>End: <span id="endLabel">0</span>s
-    <input type="range" id="endTime" value="0" min="0" max="0" step="0.1">
-  </label>
+  <label>Start (s): <input type="number" id="startTime" value="0" min="0"></label>
+  <label>End (s): <input type="number" id="endTime" value="5" min="0"></label>
   <button id="trimBtn" disabled>Trim & Download</button>
 </div>
 
@@ -47,8 +46,6 @@
     const video = document.getElementById('video');
     const startTime = document.getElementById('startTime');
     const endTime = document.getElementById('endTime');
-    const startLabel = document.getElementById('startLabel');
-    const endLabel = document.getElementById('endLabel');
     const trimBtn = document.getElementById('trimBtn');
     const logElement = document.getElementById('log');
 
@@ -63,14 +60,12 @@
       const file = e.target.files[0];
       if (!file) return;
 
-      video.src = URL.createObjectURL(file);
-
+      const videoURL = URL.createObjectURL(file);
+      video.src = videoURL;
+      video.load(); // ← لضمان تشغيل الفيديو فورًا
       video.onloadedmetadata = () => {
         videoDuration = video.duration;
-        startTime.max = videoDuration.toFixed(1);
-        endTime.max = videoDuration.toFixed(1);
         endTime.value = videoDuration.toFixed(1);
-        endLabel.textContent = videoDuration.toFixed(1);
       };
 
       if (!ffmpeg.isLoaded()) {
@@ -81,22 +76,6 @@
 
       await ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(file));
       trimBtn.disabled = false;
-    });
-
-    startTime.addEventListener('input', () => {
-      startLabel.textContent = startTime.value;
-      if (parseFloat(startTime.value) > parseFloat(endTime.value)) {
-        endTime.value = startTime.value;
-        endLabel.textContent = endTime.value;
-      }
-    });
-
-    endTime.addEventListener('input', () => {
-      endLabel.textContent = endTime.value;
-      if (parseFloat(endTime.value) < parseFloat(startTime.value)) {
-        startTime.value = endTime.value;
-        startLabel.textContent = startTime.value;
-      }
     });
 
     trimBtn.addEventListener('click', async () => {
@@ -123,4 +102,3 @@
 
 </body>
 </html>
-
