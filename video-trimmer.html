@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Video Trimmer</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Trimmer with FFmpeg</title>
   <style>
     body { font-family: sans-serif; padding: 20px; background: #f8f9fa; }
     .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -23,58 +22,72 @@
   <div class="container">
     <input type="file" id="fileInput" accept="video/*"><br>
     <video id="video" controls></video>
-    <button id="playBtn" disabled>Play/Pause Video</button>
-
-```
-<div class="controls">
-  <label>Start (s): <input type="number" id="startTime" value="0" min="0"></label>
-  <label>End (s): <input type="number" id="endTime" value="5" min="0"></label>
-  <button id="trimBtn" disabled>Trim & Download</button>
-</div>
-
-<div id="log"></div>
-```
-
+    <div class="controls">
+      <label>Start (s): <input type="number" id="startTime" value="0" min="0"></label>
+      <label>End (s): <input type="number" id="endTime" value="5" min="0"></label>
+      <button id="trimBtn" disabled>Trim & Download</button>
+    </div>
+    <div id="log"></div>
   </div>
 
-  <script>
+  <script type="module">
+    import { createFFmpeg, fetchFile } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.8/dist/ffmpeg.min.js';
+
+    const ffmpeg = createFFmpeg({ log: true });
     const fileInput = document.getElementById('fileInput');
     const video = document.getElementById('video');
-    const playBtn = document.getElementById('playBtn');
     const startTime = document.getElementById('startTime');
     const endTime = document.getElementById('endTime');
     const trimBtn = document.getElementById('trimBtn');
     const logElement = document.getElementById('log');
 
-    fileInput.addEventListener('change', () => {
-      const file = fileInput.files[0];
+    ffmpeg.setLogger(({ type, message }) => {
+      logElement.textContent += `[${type}] ${message}\n`;
+      logElement.scrollTop = logElement.scrollHeight;
+    });
+
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
       if (!file) return;
 
-      const url = URL.createObjectURL(file);
-      video.src = url;
+      const videoURL = URL.createObjectURL(file);
+      video.src = videoURL;
       video.load();
-      playBtn.disabled = false;
-      trimBtn.disabled = false;
 
       video.onloadedmetadata = () => {
         endTime.value = video.duration.toFixed(1);
-        startTime.max = video.duration.toFixed(1);
-        endTime.max = video.duration.toFixed(1);
+        trimBtn.disabled = false;
       };
-    });
 
-    playBtn.addEventListener('click', () => {
-      if (video.paused) {
-        video.play();
-      } else {
-        video.pause();
+      if (!ffmpeg.isLoaded()) {
+        logElement.textContent += 'Loading FFmpeg...\n';
+        await ffmpeg.load();
+        logElement.textContent += 'FFmpeg loaded\n';
       }
+
+      await ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(file));
     });
 
-    trimBtn.addEventListener('click', () => {
-      alert('تم تفعيل مشغل الفيديو، لكن قص الفيديو يتطلب FFmpeg في متصفح يدعم Module أو عبر خادم محلي.');
+    trimBtn.addEventListener('click', async () => {
+      const start = parseFloat(startTime.value);
+      const end = parseFloat(endTime.value);
+      const duration = end - start;
+      if (duration <= 0) return alert('End time must be greater than start time');
+
+      logElement.textContent += `Trimming video from ${start}s to ${end}s...\n`;
+      await ffmpeg.run('-i', 'input.mp4', '-ss', `${start}`, '-t', `${duration}`, '-c', 'copy', 'output.mp4');
+
+      const data = ffmpeg.FS('readFile', 'output.mp4');
+      const blob = new Blob([data.buffer], { type: 'video/mp4' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'trimmed.mp4';
+      a.click();
+
+      logElement.textContent += 'Trim finished, downloading...\n';
     });
   </script>
-
 </body>
 </html>
