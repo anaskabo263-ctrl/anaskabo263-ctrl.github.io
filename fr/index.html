@@ -1,1 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="google-adsense-account" content="ca-pub-9629738997503614">
+  <title>Édition et Conversion d'Images</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 0;
+      direction: ltr;
+    }
+    header {
+      background: #007bff;
+      color: #fff;
+      padding: 16px 12px;
+      text-align: center;
+      font-size: 1.4rem;
+    }
+    .grid {
+      max-width: 1000px;
+      margin: 28px auto;
+      display: grid;
+      gap: 18px;
+      padding: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+      transition: all .2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .card i {
+      font-size: 2.1rem;
+      color: #007bff;
+      margin-bottom: 10px;
+    }
+    .card h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #007bff;
+    }
+    .card p {
+      margin: 8px 0 0;
+      color: #444;
+      font-size: 14px;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.12);
+      background: #f0f8ff;
+    }
+    footer {
+      padding: 12px;
+      text-align: center;
+      color: #666;
+      background: #fff;
+      margin-top: 18px;
+    }
+    footer a {
+      color: #007bff;
+      text-decoration: none;
+      margin-left: 6px;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+    @media(max-width:480px) {
+      header { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>📸 Édition et Conversion d'Images</header>
+
+  <div class="grid">
+
+    <a class="card" href="./resize.html">
+      <i class="fa-solid fa-crop"></i>
+      <h3>Redimensionner l'image</h3>
+      <p>Modifier la taille de l’image en conservant la qualité</p>
+    </a>
+
+    <a class="card" href="./convert.html">
+      <i class="fa-solid fa-arrows-rotate"></i>
+      <h3>Convertir le format d'image</h3>
+      <p>Convertir entre PNG / JPEG / WEBP via le navigateur</p>
+    </a>
+
+    <a class="card" href="./crop.html">
+      <i class="fa-solid fa-expand"></i>
+      <h3>Rogner l'image</h3>
+      <p>Outil de découpe interactif avec Cropper.js</p>
+    </a>
+
+    <a class="card" href="./features.html">
+      <i class="fa-solid fa-star"></i>
+      <h3>Fonctionnalités du site</h3>
+      <p>Rapide, sûr et facile à utiliser</p>
+    </a>
+
+    <a class="card" href="./video-screenshot.html">
+      <i class="fa-solid fa-film"></i>
+      <h3>Capturer une image depuis une vidéo</h3>
+      <p>Téléchargez une vidéo et capturez des images HD instantanément</p>
+    </a>
+
+  </div>
+
+  <footer>
+    © 2025 Tous droits réservés |
+    <a href="privacy.html">Politique de confidentialité</a>
+  </footer>
+</body>
+</html>
 
