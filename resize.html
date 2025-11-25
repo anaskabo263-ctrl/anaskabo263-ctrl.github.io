@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
   <meta charset="UTF-8" />
   <meta name="google-adsense-account" content="ca-pub-9629738997503614">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Image Resizer</title>
+  <title>مُغيّر حجم الصور</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    body{font-family:sans-serif;background:#f8f9fa;margin:0;padding:18px;direction:ltr}
+    body{font-family:sans-serif;background:#f8f9fa;margin:0;padding:18px;direction:rtl;text-align:right}
     .card{max-width:900px;margin:12px auto;background:#fff;padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(10,20,40,0.06)}
     h1{text-align:center;margin:6px 0 16px}
     .drop{border:2px dashed #d8dee6;border-radius:10px;padding:18px;text-align:center;cursor:pointer;background:#fbfcfe}
@@ -22,17 +22,17 @@
     .links{margin-top:14px;text-align:center}
     a.nav{display:inline-block;margin:6px;padding:8px 12px;border:1px solid #0b5cff;color:#0b5cff;border-radius:8px;text-decoration:none}
     .small{font-size:13px;color:#666;margin-top:8px;text-align:center}
-    footer{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;color:#666;font-size:14px;margin-top:18px;}
+    footer{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;color:#666;font-size:14px;margin-top:18px;text-align:center}
     @media(max-width:620px){.controls{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}}
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>🖼️ Image Resizer</h1>
+    <h1>🖼️ مُغيّر حجم الصور</h1>
 
     <div id="dropZone" class="drop">
-      <span>Drag & drop an image here or click to select a file</span><br>
-      <small class="small">Supports PNG / JPEG / WEBP — processing happens locally</small>
+      <span>اسحب الصورة هنا أو انقر لاختيار ملف</span><br>
+      <small class="small">يدعم PNG / JPEG / WEBP — تتم المعالجة محليًا</small>
       <input id="fileInput" type="file" accept="image/*" style="display:none">
     </div>
 
@@ -40,18 +40,18 @@
 
     <div class="controls">
       <div>
-        <label for="widthInput">Width (px)</label>
+        <label for="widthInput">العرض (px)</label>
         <input id="widthInput" type="number" value="800" min="1">
       </div>
       <div>
-        <label for="heightInput">Height (px)</label>
+        <label for="heightInput">الارتفاع (px)</label>
         <input id="heightInput" type="number" value="600" min="1">
       </div>
       <div>
-        <label><input id="keepAspect" type="checkbox" checked> Keep aspect ratio</label>
+        <label><input id="keepAspect" type="checkbox" checked> الحفاظ على نسبة الأبعاد</label>
       </div>
       <div>
-        <label for="formatSelect">Format</label>
+        <label for="formatSelect">الصيغة</label>
         <select id="formatSelect">
           <option value="image/png">PNG</option>
           <option value="image/jpeg">JPEG</option>
@@ -59,31 +59,31 @@
         </select>
       </div>
       <div>
-        <label for="qualityRange">Quality: <span id="qualityLabel">90%</span></label>
+        <label for="qualityRange">الجودة: <span id="qualityLabel">90%</span></label>
         <input id="qualityRange" type="range" min="0.1" max="1" step="0.05" value="0.9">
       </div>
     </div>
 
     <div class="row">
-      <button id="downloadBtn" class="btn" disabled>⬇ Download</button>
-      <button id="resetBtn" class="btn" style="background:#6c757d">Reset</button>
+      <button id="downloadBtn" class="btn" disabled>⬇ تنزيل</button>
+      <button id="resetBtn" class="btn" style="background:#6c757d">إعادة تعيين</button>
     </div>
 
     <div id="originalSize" class="small"></div>
 
     <div class="links">
-      <a class="nav" href="./index.html">🏠 Home</a>
-      <a class="nav" href="./convert.html">🔄 Convert</a>
-      <a class="nav" href="./crop.html">✂ Crop</a>
-      <a class="nav" href="./features.html">⭐ Features</a>
-      <a class="nav" href="./privacy.html">🔒 Privacy Policy</a>
+      <a class="nav" href="./index.html">🏠 الرئيسية</a>
+      <a class="nav" href="./convert.html">🔄 تحويل</a>
+      <a class="nav" href="./crop.html">✂ قص</a>
+      <a class="nav" href="./features.html">⭐ المزايا</a>
+      <a class="nav" href="./privacy.html">🔒 سياسة الخصوصية</a>
     </div>
   </div>
 
   <footer>
-    <span>© 2025 All rights reserved</span>
+    <span>© 2025 جميع الحقوق محفوظة</span>
     <span>|</span>
-    <a href="./privacy.html" style="color:#0b5cff;text-decoration:none;">Privacy Policy</a>
+    <a href="./privacy.html" style="color:#0b5cff;text-decoration:none;">سياسة الخصوصية</a>
   </footer>
 
   <canvas id="canvas" style="display:none"></canvas>
@@ -119,7 +119,7 @@
     fileInput.addEventListener('change', ()=>{ if(fileInput.files && fileInput.files[0]) handleFile(fileInput.files[0]); });
 
     function handleFile(file){
-      if(!file.type.startsWith('image/')){ alert('File is not an image.'); return; }
+      if(!file.type.startsWith('image/')){ alert('الملف ليس صورة.'); return; }
       const reader = new FileReader();
       reader.onload = (e)=>{
         const img = new Image();
@@ -171,7 +171,7 @@
       const format = formatSelect.value;
       const quality = (format === 'image/jpeg' || format === 'image/webp') ? parseFloat(qualityRange.value) : undefined;
       canvas.toBlob((blob)=>{
-        if(!blob){ alert('Failed to create image.'); return; }
+        if(!blob){ alert('فشل في إنشاء الصورة.'); return; }
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         const ext = format === 'image/png' ? 'png' : (format === 'image/jpeg' ? 'jpg' : 'webp');
