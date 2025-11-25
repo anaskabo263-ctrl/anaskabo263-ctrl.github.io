@@ -1,1 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="google-adsense-account" content="ca-pub-9629738997503614">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Image Resizer</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body{font-family:sans-serif;background:#f8f9fa;margin:0;padding:18px;direction:ltr}
+    .card{max-width:900px;margin:12px auto;background:#fff;padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(10,20,40,0.06)}
+    h1{text-align:center;margin:6px 0 16px}
+    .drop{border:2px dashed #d8dee6;border-radius:10px;padding:18px;text-align:center;cursor:pointer;background:#fbfcfe}
+    .drop.drag{border-color:#0b5cff;background:#f0f6ff}
+    .preview img{max-width:100%;height:auto;border-radius:8px;display:block;margin:12px auto}
+    .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:12px}
+    label{display:block;margin-bottom:6px;font-size:13px}
+    input,select{width:100%;padding:8px;border-radius:8px;border:1px solid #dde4ea;box-sizing:border-box}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;justify-content:center}
+    .btn{padding:10px 14px;border-radius:8px;background:#0b5cff;color:#fff;border:none;cursor:pointer}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .links{margin-top:14px;text-align:center}
+    a.nav{display:inline-block;margin:6px;padding:8px 12px;border:1px solid #0b5cff;color:#0b5cff;border-radius:8px;text-decoration:none}
+    .small{font-size:13px;color:#666;margin-top:8px;text-align:center}
+    footer{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;color:#666;font-size:14px;margin-top:18px;}
+    @media(max-width:620px){.controls{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🖼️ Image Resizer</h1>
+
+    <div id="dropZone" class="drop">
+      <span>Drag & drop an image here or click to select a file</span><br>
+      <small class="small">Supports PNG / JPEG / WEBP — processing happens locally</small>
+      <input id="fileInput" type="file" accept="image/*" style="display:none">
+    </div>
+
+    <div id="preview" class="preview"></div>
+
+    <div class="controls">
+      <div>
+        <label for="widthInput">Width (px)</label>
+        <input id="widthInput" type="number" value="800" min="1">
+      </div>
+      <div>
+        <label for="heightInput">Height (px)</label>
+        <input id="heightInput" type="number" value="600" min="1">
+      </div>
+      <div>
+        <label><input id="keepAspect" type="checkbox" checked> Keep aspect ratio</label>
+      </div>
+      <div>
+        <label for="formatSelect">Format</label>
+        <select id="formatSelect">
+          <option value="image/png">PNG</option>
+          <option value="image/jpeg">JPEG</option>
+          <option value="image/webp">WEBP</option>
+        </select>
+      </div>
+      <div>
+        <label for="qualityRange">Quality: <span id="qualityLabel">90%</span></label>
+        <input id="qualityRange" type="range" min="0.1" max="1" step="0.05" value="0.9">
+      </div>
+    </div>
+
+    <div class="row">
+      <button id="downloadBtn" class="btn" disabled>⬇ Download</button>
+      <button id="resetBtn" class="btn" style="background:#6c757d">Reset</button>
+    </div>
+
+    <div id="originalSize" class="small"></div>
+
+    <div class="links">
+      <a class="nav" href="./index.html">🏠 Home</a>
+      <a class="nav" href="./convert.html">🔄 Convert</a>
+      <a class="nav" href="./crop.html">✂ Crop</a>
+      <a class="nav" href="./features.html">⭐ Features</a>
+      <a class="nav" href="./privacy.html">🔒 Privacy Policy</a>
+    </div>
+  </div>
+
+  <footer>
+    <span>© 2025 All rights reserved</span>
+    <span>|</span>
+    <a href="./privacy.html" style="color:#0b5cff;text-decoration:none;">Privacy Policy</a>
+  </footer>
+
+  <canvas id="canvas" style="display:none"></canvas>
+
+  <script>
+    // ---------- Image handling ----------
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const canvas = document.getElementById('canvas');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const widthInput = document.getElementById('widthInput');
+    const heightInput = document.getElementById('heightInput');
+    const keepAspect = document.getElementById('keepAspect');
+    const formatSelect = document.getElementById('formatSelect');
+    const qualityRange = document.getElementById('qualityRange');
+    const qualityLabel = document.getElementById('qualityLabel');
+    const originalSize = document.getElementById('originalSize');
+
+    let currentImage = null;
+    let naturalW = 0, naturalH = 0;
+
+    dropZone.addEventListener('click', ()=> fileInput.click());
+    dropZone.addEventListener('dragover', (e)=>{ e.preventDefault(); dropZone.classList.add('drag'); });
+    dropZone.addEventListener('dragleave', (e)=>{ e.preventDefault(); dropZone.classList.remove('drag'); });
+    dropZone.addEventListener('drop', (e)=>{
+      e.preventDefault(); dropZone.classList.remove('drag');
+      const files = e.dataTransfer.files;
+      if(files && files[0]) handleFile(files[0]);
+    });
+
+    fileInput.addEventListener('change', ()=>{ if(fileInput.files && fileInput.files[0]) handleFile(fileInput.files[0]); });
+
+    function handleFile(file){
+      if(!file.type.startsWith('image/')){ alert('File is not an image.'); return; }
+      const reader = new FileReader();
+      reader.onload = (e)=>{
+        const img = new Image();
+        img.onload = ()=>{
+          naturalW = img.naturalWidth; naturalH = img.naturalHeight;
+          currentImage = img;
+          const defaultW = Math.min(800, naturalW);
+          const defaultH = Math.round(defaultW * naturalH / naturalW);
+          widthInput.value = defaultW; heightInput.value = defaultH;
+          originalSize.textContent = `${file.name} — ${naturalW}×${naturalH}px — ${(file.size/1024).toFixed(1)} KB`;
+          preview.innerHTML = '';
+          const imgEl = document.createElement('img');
+          imgEl.src = e.target.result;
+          imgEl.alt = file.name;
+          preview.appendChild(imgEl);
+          downloadBtn.disabled = false;
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    qualityRange.addEventListener('input', ()=>{ qualityLabel.textContent = Math.round(qualityRange.value*100)+'%'; });
+
+    widthInput.addEventListener('input', ()=>{
+      if(keepAspect.checked && currentImage){
+        const w = parseInt(widthInput.value) || 1;
+        const h = Math.round(w * naturalH / naturalW);
+        heightInput.value = h;
+      }
+    });
+
+    heightInput.addEventListener('input', ()=>{
+      if(keepAspect.checked && currentImage){
+        const h = parseInt(heightInput.value) || 1;
+        const w = Math.round(h * naturalW / naturalH);
+        widthInput.value = w;
+      }
+    });
+
+    downloadBtn.addEventListener('click', ()=>{
+      if(!currentImage) return;
+      const w = parseInt(widthInput.value) || 1;
+      const h = parseInt(heightInput.value) || 1;
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,w,h);
+      ctx.drawImage(currentImage, 0, 0, w, h);
+      const format = formatSelect.value;
+      const quality = (format === 'image/jpeg' || format === 'image/webp') ? parseFloat(qualityRange.value) : undefined;
+      canvas.toBlob((blob)=>{
+        if(!blob){ alert('Failed to create image.'); return; }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const ext = format === 'image/png' ? 'png' : (format === 'image/jpeg' ? 'jpg' : 'webp');
+        a.href = url;
+        a.download = `resized.${ext}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(()=> URL.revokeObjectURL(url), 1000);
+      }, format, quality);
+    });
+
+    resetBtn.addEventListener('click', ()=>{
+      fileInput.value = '';
+      preview.innerHTML = '';
+      downloadBtn.disabled = true;
+      originalSize.textContent = '';
+      widthInput.value = 800;
+      heightInput.value = 600;
+      qualityRange.value = 0.9;
+      qualityLabel.textContent = '90%';
+    });
+
+    dropZone.setAttribute('tabindex', '0');
+    dropZone.addEventListener('keypress', (e)=>{ if(e.key === 'Enter' || e.key === ' ') fileInput.click(); });
+  </script>
+</body>
+</html>
 
