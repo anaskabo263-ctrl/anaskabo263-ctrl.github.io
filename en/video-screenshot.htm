@@ -1,1 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Video Screenshot Capture</title>
 
+  <style>
+    :root{
+      --accent:#0b5cff;
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --muted:#666;
+    }
+
+    body{
+      margin:0;
+      font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg,#f0f4ff 0%, #f6f7fb 100%);
+      display:flex;
+      justify-content:center;
+      padding:28px;
+      color:#222;
+    }
+
+    .wrap{
+      width:100%;
+      max-width:1100px;
+      background:var(--card);
+      border-radius:14px;
+      box-shadow:0 10px 30px rgba(20,30,60,0.08);
+      padding:20px;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      margin-bottom:12px;
+    }
+    header h1{margin:0;font-size:20px;color:var(--accent)}
+    header p{margin:0;color:var(--muted);font-size:13px}
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap:18px;
+    }
+    @media(max-width:980px){ .grid{grid-template-columns:1fr} }
+
+    .player-card{
+      background:linear-gradient(180deg,#fff,#fbfdff);
+      border-radius:12px;padding:14px;border:1px solid rgba(11,92,255,0.06);
+    }
+
+    .video-area{
+      background:#000;border-radius:10px;overflow:hidden;
+      display:flex;align-items:center;justify-content:center;
+      height:420px;
+      position:relative;
+    }
+    video{
+      max-width:100%; max-height:100%; background:#000; display:block;
+    }
+
+    .upload-row{
+      display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;
+    }
+    .input, .btn {
+      padding:10px 12px;border-radius:8px;border:1px solid #dfe7ff;background:#fff;
+      font-size:14px;
+    }
+    .input[type="text"]{flex:1;min-width:160px}
+    .btn{cursor:pointer;background:var(--accent);color:#fff;border:none;box-shadow:0 6px 18px rgba(11,92,255,0.15)}
+    .btn.secondary{background:#fff;color:var(--accent);border:1px solid rgba(11,92,255,0.12);box-shadow:none}
+
+    .controls{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+    .controls .small{font-size:13px;color:var(--muted)}
+
+    .side{
+      display:flex;flex-direction:column;gap:12px;
+    }
+    .card{
+      background:#fff;border-radius:10px;padding:12px;border:1px solid rgba(0,0,0,0.04);
+    }
+    .card h3{margin:0 0 8px 0;font-size:15px;color:var(--accent)}
+    .field{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    label{font-size:13px;color:var(--muted);min-width:120px}
+
+    .gallery{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;
+      margin-top:6px;
+    }
+    .thumb{position:relative;border-radius:8px;overflow:hidden;border:1px solid rgba(0,0,0,0.06)}
+    .thumb img{display:block;width:100%;height:100%;object-fit:cover}
+    .thumb .tools{position:absolute;right:6px;top:6px;display:flex;gap:6px}
+    .icon-btn{background:rgba(0,0,0,0.5);color:#fff;padding:6px;border-radius:6px;font-size:12px;cursor:pointer;border:none}
+
+    .hint{font-size:12px;color:var(--muted);margin-top:6px}
+
+    footer.small{margin-top:10px;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>🎬 Video Screenshot Capture</h1>
+        <p>Upload videos or paste URLs — then capture high-quality screenshots instantly.</p>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="player-card">
+        <div class="video-area" id="videoArea">
+          <video id="video" controls crossorigin="anonymous" playsinline></video>
+        </div>
+
+        <div class="upload-row">
+          <input id="fileInput" class="input" type="file" accept="video/*">
+          <input id="urlInput" class="input" type="text" placeholder="Or paste video URL">
+          <button id="loadUrlBtn" class="btn secondary">Load URL</button>
+          <button id="playPauseBtn" class="btn">Play / Pause</button>
+        </div>
+
+        <div class="controls">
+          <button id="captureBtn" class="btn">📸 Screenshot</button>
+          <button id="captureAllBtn" class="btn secondary">⏱ Sequence</button>
+
+          <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+            <div class="small">Format</div>
+            <select id="imgFormat" class="input" style="width:90px">
+              <option value="png">PNG</option>
+              <option value="jpeg">JPG</option>
+            </select>
+
+            <div class="small">Quality</div>
+            <input id="imgQuality" type="number" class="input" min="10" max="100" value="92" style="width:80px">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">
+          <div class="small">Width (0 = auto)</div>
+          <input id="outWidth" type="number" class="input" min="0" value="0" style="width:110px">
+          <div class="small">Height</div>
+          <input id="outHeight" type="number" class="input" min="0" value="0" style="width:110px">
+          <label style="display:flex;align-items:center;gap:6px;margin-left:8px"><input id="keepAspect" type="checkbox" checked> Keep aspect</label>
+        </div>
+      </div>
+
+      <div class="side">
+        <div class="card">
+          <h3>Sequence Capture</h3>
+          <div class="field"><label>Start (s)</label><input id="seqStart" type="number" class="input" value="0"></div>
+          <div class="field"><label>End (s)</label><input id="seqEnd" type="number" class="input" value="5"></div>
+          <div class="field"><label>Interval (s)</label><input id="seqInterval" type="number" class="input" value="1" step="0.1"></div>
+        </div>
+
+        <div class="card">
+          <h3>Captured Images</h3>
+          <div id="gallery" class="gallery"></div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button id="downloadAll" class="btn secondary">⬇ Download All</button>
+            <button id="clearAll" class="btn secondary">🗑 Clear</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <footer class="small">Space = Play/Pause • S = Screenshot</footer>
+  </div>
+
+  <script>
+    const video = document.getElementById('video');
+    const fileInput = document.getElementById('fileInput');
+    const urlInput = document.getElementById('urlInput');
+    const loadUrlBtn = document.getElementById('loadUrlBtn');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const captureBtn = document.getElementById('captureBtn');
+    const captureAllBtn = document.getElementById('captureAllBtn');
+    const gallery = document.getElementById('gallery');
+    const imgFormat = document.getElementById('imgFormat');
+    const imgQuality = document.getElementById('imgQuality');
+    const outWidth = document.getElementById('outWidth');
+    const outHeight = document.getElementById('outHeight');
+    const keepAspect = document.getElementById('keepAspect');
+    const seqStart = document.getElementById('seqStart');
+    const seqEnd = document.getElementById('seqEnd');
+    const seqInterval = document.getElementById('seqInterval');
+    const downloadAllBtn = document.getElementById('downloadAll');
+    const clearAllBtn = document.getElementById('clearAll');
+
+    let captures = [];
+
+    function setVideoSourceFromFile(file){
+      const url = URL.createObjectURL(file);
+      video.src = url;
+      video.load();
+      video.play().catch(()=>{});
+    }
+
+    fileInput.addEventListener('change', (e)=>{
+      const f = e.target.files?.[0];
+      if(!f) return;
+      if(!f.type.startsWith('video/')) return alert("Please select a video file.");
+      setVideoSourceFromFile(f);
+    });
+
+    loadUrlBtn.addEventListener('click', ()=>{
+      const url = urlInput.value.trim();
+      if(!url) return alert("Paste a valid video URL first.");
+      video.src = url;
+      video.load();
+      video.play().catch(()=>{});
+    });
+
+    playPauseBtn.addEventListener('click', ()=>{
+      if(video.paused) video.play();
+      else video.pause();
+    });
+
+    function captureFrame(){
+      const canvas = document.createElement("canvas");
+
+      let w = outWidth.valueAsNumber || video.videoWidth;
+      let h = outHeight.valueAsNumber || video.videoHeight;
+
+      if(keepAspect.checked && outWidth.value > 0 && outHeight.value == 0){
+        h = (video.videoHeight / video.videoWidth) * w;
+      }
+
+      canvas.width = w;
+      canvas.height = h;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, w, h);
+
+      const quality = imgQuality.value / 100;
+      const format = imgFormat.value === "jpeg" ? "image/jpeg" : "image/png";
+
+      const dataUrl = canvas.toDataURL(format, quality);
+      addToGallery(dataUrl);
+    }
+
+    function addToGallery(url){
+      const div = document.createElement("div");
+      div.className = "thumb";
+      div.innerHTML = `
+        <img src="${url}">
+        <div class="tools">
+          <button class="icon-btn" onclick="downloadImage('${url}')">⬇</button>
+        </div>
+      `;
+      gallery.appendChild(div);
+      captures.push(url);
+    }
+
+    window.downloadImage = function(url){
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "capture.png";
+      a.click();
+    }
+
+    captureBtn.addEventListener('click', captureFrame);
+
+    captureAllBtn.addEventListener('click', ()=>{
+      let start = seqStart.valueAsNumber;
+      let end = seqEnd.valueAsNumber;
+      let step = seqInterval.valueAsNumber;
+
+      if(end <= start) return alert("End time must be greater than start.");
+      
+      let t = start;
+      video.currentTime = t;
+
+      function stepCapture(){
+        captureFrame();
+        t += step;
+        if(t <= end){
+          video.currentTime = t;
+          setTimeout(stepCapture, 400);
+        }
+      }
+      stepCapture();
+    });
+
+    clearAllBtn.addEventListener('click', ()=>{
+      captures = [];
+      gallery.innerHTML = "";
+    });
+  </script>
+</body>
+</html>
