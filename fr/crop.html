@@ -1,1 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Outil de découpe d'image</title>
+
+<!-- Cropper.js CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:#f8f9fa;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:20px;
+}
+
+.container{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+  max-width:900px;
+  width:100%;
+  background:#fff;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.1);
+}
+
+header{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+header h1{
+  font-size:32px;
+  color:#007bff;
+  margin-bottom:10px;
+}
+
+header p{
+  font-size:18px;
+  color:#333;
+  max-width:700px;
+  margin:0 auto;
+}
+
+img{
+  max-width:100%;
+  display:block;
+  border-radius:10px;
+}
+
+input, button{
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid #dfe7ff;
+  font-size:14px;
+}
+
+button{
+  border:none;
+  cursor:pointer;
+  background:#007bff;
+  color:#fff;
+  margin-top:10px;
+}
+
+button:hover{
+  background:#0056b3;
+}
+
+.size-inputs{
+  display:flex;
+  gap:10px;
+  margin-top:8px;
+}
+.size-inputs input{
+  width:120px;
+}
+.size-inputs label{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-size:14px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>📐 Outil de découpe d'image</h1>
+    <p>
+      Recadrez vos images rapidement et facilement dans votre navigateur. Spécifiez la largeur et la hauteur, conservez le ratio si nécessaire, et téléchargez instantanément.
+    </p>
+  </header>
+
+  <input type="file" id="inputImage" accept="image/*">
+  <img id="image" style="display:none;">
+
+  <div class="size-inputs">
+    <input type="number" id="cropWidth" placeholder="Largeur (px)" min="1">
+    <input type="number" id="cropHeight" placeholder="Hauteur (px)" min="1">
+    <label><input type="checkbox" id="keepAspect" checked> Conserver le ratio</label>
+  </div>
+
+  <button id="cropBtn">📸 Recadrer & Télécharger</button>
+</div>
+
+<!-- Cropper.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script>
+let cropper;
+const image = document.getElementById('image');
+const input = document.getElementById('inputImage');
+const cropBtn = document.getElementById('cropBtn');
+const cropWidth = document.getElementById('cropWidth');
+const cropHeight = document.getElementById('cropHeight');
+const keepAspect = document.getElementById('keepAspect');
+
+input.addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const url = URL.createObjectURL(file);
+  image.src = url;
+  image.style.display = 'block';
+
+  if(cropper) cropper.destroy();
+  cropper = new Cropper(image, {
+    aspectRatio: NaN,
+    viewMode: 1,
+    autoCropArea: 1,
+  });
+});
+
+cropBtn.addEventListener('click', ()=>{
+  if(!cropper) return alert("Veuillez d'abord téléverser une image !");
+
+  let options = {};
+  let width = parseInt(cropWidth.value);
+  let height = parseInt(cropHeight.value);
+
+  if(width>0) options.width = width;
+  if(height>0) options.height = height;
+  if(keepAspect.checked && width && height){
+    options.height = undefined; // conserver le ratio
+  }
+
+  const canvas = cropper.getCroppedCanvas(options);
+  if(!canvas) return alert("Échec du recadrage !");
+
+  const url = canvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = "recadré.png";
+  a.click();
+});
+</script>
+
+</body>
+</html>
 
