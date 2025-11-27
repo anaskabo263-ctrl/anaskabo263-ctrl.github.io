@@ -1,1 +1,216 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Convertisseur de format d'image</title>
+
+  <meta name="google-adsense-account" content="ca-pub-9629738997503614">
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-CECGX11WVH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}    
+    gtag('js', new Date());
+    gtag('config', 'G-CECGX11WVH');
+  </script>
+
+  <style>
+    :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans",Arial}
+    body{background:#f6f7f9;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    .card{width:100%;max-width:900px;background:#fff;padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(10,20,40,0.08)}
+    h1{text-align:center;margin:6px 0 14px}
+    .row{display:grid;grid-template-columns:1fr 320px;gap:16px}
+    @media(max-width:880px){.row{grid-template-columns:1fr}}
+    .left{padding:6px}
+    .drop{border:2px dashed #d0d6df;border-radius:10px;padding:18px;text-align:center;cursor:pointer;background:#fbfcfe}
+    .drop.drag{border-color:#0b5cff}
+    .preview img{max-width:100%;height:auto;border-radius:8px;display:block;margin:12px auto}
+    label{display:block;margin-bottom:6px;font-size:13px}
+    select,input[type="number"],input[type="file"],textarea{width:100%;padding:8px;border-radius:8px;border:1px solid #dde4ea;box-sizing:border-box}
+    .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:12px}
+    .btn{display:inline-block;padding:10px 14px;border-radius:8px;background:#0b5cff;color:#fff;border:none;cursor:pointer}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .small{font-size:13px;color:#666;margin-top:8px}
+    .link-row{text-align:center;margin-top:14px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🔄 Convertisseur d'images</h1>
+
+    <div style="max-width:750px;margin:0 auto 25px;padding:16px 20px;background:#f0f4ff;border-left:5px solid #0b5cff;border-radius:10px;color:#333;font-size:15px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+      <h2 style="color:#0b5cff;font-size:20px;margin:0 0 10px">⭐ Que fait cet outil</h2>
+      <p>Ce <strong>convertisseur d'images en ligne gratuit</strong> vous permet de convertir instantanément des images entre les formats <strong>PNG, JPG et WEBP</strong>. Vous pouvez facilement <strong>téléverser, redimensionner, compresser</strong> et télécharger vos images. Tout se fait localement — 100% privé.</p>
+      <ul style="list-style:none;padding:0;margin:10px 0 0;font-size:14px;color:#444">
+        <li>✨ Convertir PNG ↔ JPG ↔ WEBP</li>
+        <li>✨ Ajuster la qualité</li>
+        <li>✨ Redimensionner en conservant le ratio</li>
+        <li>✨ Rapide & sécurisé — traitement hors ligne</li>
+      </ul>
+    </div>
+
+    <div class="row">
+      <div class="left">
+        <div id="dropZone" class="drop">
+          Glisser-déposer ou cliquez pour téléverser<br>
+          <small class="small" id="supported-text">Formats supportés : PNG / JPEG / WEBP</small>
+          <input id="fileInput" type="file" accept="image/*" style="display:none">
+        </div>
+
+        <div class="controls">
+          <div>
+            <label for="toFormat">Convertir en</label>
+            <select id="toFormat">
+              <option value="image/png">PNG</option>
+              <option value="image/jpeg">JPEG</option>
+              <option value="image/webp">WEBP</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="qualityRange">Qualité <span id="qLabel">90%</span></label>
+            <input id="qualityRange" type="range" min="0.1" max="1" step="0.05" value="0.9">
+          </div>
+
+          <div>
+            <label for="widthInput">Largeur (px)</label>
+            <input id="widthInput" type="number" min="0" value="0">
+          </div>
+
+          <div>
+            <label for="heightInput">Hauteur (px)</label>
+            <input id="heightInput" type="number" min="0" value="0">
+          </div>
+
+          <div style="align-self:end">
+            <label><input id="keepAspect" type="checkbox" checked> Conserver le ratio</label>
+          </div>
+
+          <div style="align-self:end">
+            <button id="convertBtn" class="btn" disabled>⬇ Convertir & Télécharger</button>
+          </div>
+        </div>
+
+        <p class="small">Le traitement se fait localement — rien n'est téléversé.</p>
+
+        <div class="link-row">
+          <a href="./index.html" style="color:#0b5cff;text-decoration:none">🏠 Accueil</a> |
+          <a href="./privacy.html" style="color:#0b5cff;text-decoration:none" target="_blank">Politique de confidentialité</a>
+        </div>
+      </div>
+
+      <div>
+        <div id="previewArea" class="preview"></div>
+        <div id="meta" class="small" style="text-align:left"></div>
+      </div>
+    </div>
+
+    <canvas id="canvas" style="display:none"></canvas>
+  </div>
+
+<script>
+// Le script reste inchangé
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const previewArea = document.getElementById('previewArea');
+const meta = document.getElementById('meta');
+const toFormat = document.getElementById('toFormat');
+const qualityRange = document.getElementById('qualityRange');
+const qLabel = document.getElementById('qLabel');
+const widthInput = document.getElementById('widthInput');
+const heightInput = document.getElementById('heightInput');
+const keepAspect = document.getElementById('keepAspect');
+const convertBtn = document.getElementById('convertBtn');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+let image = new Image();
+let originalName = '';
+let aspect = 1;
+
+dropZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', (e) => { if (e.target.files && e.target.files[0]) loadFile(e.target.files[0]); });
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', e => { e.preventDefault(); dropZone.classList.remove('drag'); });
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag');
+  const f = e.dataTransfer.files && e.dataTransfer.files[0];
+  if (f) loadFile(f);
+});
+
+function loadFile(file){
+  if(!file.type.startsWith('image/')) return alert("Fichier image invalide");
+
+  originalName = file.name.replace(/\.[^/.]+$/, "");
+
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    image = new Image();
+    image.onload = () => {
+      aspect = image.width / image.height;
+      previewArea.innerHTML = '';
+      image.style.maxWidth = '100%';
+      previewArea.appendChild(image);
+
+      meta.innerHTML = `Nom : <strong>${originalName}</strong> — Taille : <strong>${image.width}×${image.height}</strong>`;
+
+      convertBtn.disabled = false;
+
+      if(parseInt(widthInput.value) === 0) widthInput.value = image.width;
+      if(parseInt(heightInput.value) === 0) heightInput.value = image.height;
+    };
+    image.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+qualityRange.addEventListener('input', ()=> qLabel.textContent = Math.round(qualityRange.value*100) + '%');
+
+widthInput.addEventListener('input', ()=>{
+  if(keepAspect.checked && image.width){
+    const w = parseInt(widthInput.value) || 0;
+    if(w>0) heightInput.value = Math.round(w / aspect);
+  }
+});
+
+heightInput.addEventListener('input', ()=>{
+  if(keepAspect.checked && image.height){
+    const h = parseInt(heightInput.value) || 0;
+    if(h>0) widthInput.value = Math.round(h * aspect);
+  }
+});
+
+convertBtn.addEventListener('click', ()=>{
+  if(!image.src) return alert("Aucune image chargée");
+
+  const mime = toFormat.value;
+  const q = parseFloat(qualityRange.value);
+
+  let w = parseInt(widthInput.value) || image.width;
+  let h = parseInt(heightInput.value) || image.height;
+
+  canvas.width = w;
+  canvas.height = h;
+  ctx.drawImage(image, 0, 0, w, h);
+
+  canvas.toBlob(blob =>{
+    const ext = mime.split('/')[1];
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${originalName}-converti.${ext}`;
+    document.body.appendChild(link);
+    link.click();
+    URL.revokeObjectURL(link.href);
+    link.remove();
+  }, mime, q);
+});
+
+window.addEventListener('dragover', e=>e.preventDefault());
+window.addEventListener('drop', e=>e.preventDefault());
+</script>
+</body>
+</html>
 
