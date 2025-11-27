@@ -31,7 +31,7 @@
     <h1>🖼️ Image Resizer</h1>
 
     <div id="dropZone" class="drop">
-      <span>Drag & Drop an image here or click to choose a file</span><br>
+      <span>Drag & drop an image here or click to select a file</span><br>
       <small class="small">Supports PNG / JPEG / WEBP — processed locally</small>
       <input id="fileInput" type="file" accept="image/*" style="display:none">
     </div>
@@ -89,6 +89,7 @@
   <canvas id="canvas" style="display:none"></canvas>
 
   <script>
+    // ---------- Image handling ----------
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
     const preview = document.getElementById('preview');
@@ -118,7 +119,7 @@
     fileInput.addEventListener('change', ()=>{ if(fileInput.files && fileInput.files[0]) handleFile(fileInput.files[0]); });
 
     function handleFile(file){
-      if(!file.type.startsWith('image/')){ alert('File is not an image.'); return; }
+      if(!file.type.startsWith('image/')){ alert('The file is not an image.'); return; }
       const reader = new FileReader();
       reader.onload = (e)=>{
         const img = new Image();
@@ -198,4 +199,4 @@
     dropZone.addEventListener('keypress', (e)=>{ if(e.key === 'Enter' || e.key === ' ') fileInput.click(); });
   </script>
 </body>
-</html> 
+</html>
