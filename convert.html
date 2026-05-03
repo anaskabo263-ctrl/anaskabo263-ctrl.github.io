@@ -3,10 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Image Format Converter</title>
+  <title>Image to PDF & Format Converter</title>
 
   <!-- AdSense Verification -->
   <meta name="google-adsense-account" content="ca-pub-9629738997503614">
+
+  <!-- استدعاء مكتبة jsPDF للتحويل إلى PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-CECGX11WVH"></script>
@@ -21,17 +24,17 @@
     :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans",Arial}
     body{background:#f6f7f9;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;direction:ltr}
     .card{width:100%;max-width:900px;background:#fff;padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(10,20,40,0.08)}
-    h1{text-align:center;margin:6px 0 14px}
+    h1{text-align:center;margin:6px 0 14px; color: #0b5cff;}
     .row{display:grid;grid-template-columns:1fr 320px;gap:16px}
     @media(max-width:880px){.row{grid-template-columns:1fr}}
     .left{padding:6px}
     .drop{border:2px dashed #d0d6df;border-radius:10px;padding:18px;text-align:center;cursor:pointer;background:#fbfcfe}
-    .drop.drag{border-color:#0b5cff}
-    .preview img{max-width:100%;height:auto;border-radius:8px;display:block;margin:12px auto}
-    label{display:block;margin-bottom:6px;font-size:13px}
+    .drop.drag{border-color:#0b5cff; background: #f0f4ff;}
+    .preview img{max-width:100%;height:auto;border-radius:8px;display:block;margin:12px auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1);}
+    label{display:block;margin-bottom:6px;font-size:13px; font-weight: bold;}
     select,input[type="number"],input[type="file"],textarea{width:100%;padding:8px;border-radius:8px;border:1px solid #dde4ea;box-sizing:border-box}
     .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:12px}
-    .btn{display:inline-block;padding:10px 14px;border-radius:8px;background:#0b5cff;color:#fff;border:none;cursor:pointer}
+    .btn{display:inline-block;padding:12px 14px;border-radius:8px;background:#0b5cff;color:#fff;border:none;cursor:pointer; width: 100%; font-weight: bold;}
     .btn:disabled{opacity:.6;cursor:not-allowed}
     .small{font-size:13px;color:#666;margin-top:8px}
     .link-row{margin-top:14px;text-align:center}
@@ -39,102 +42,72 @@
 </head>
 <body>
   <div class="card">
-    <h1 id="page-title">🔄 Image Format Converter</h1>
+    <h1 id="page-title">🔄 Image & PDF Converter</h1>
 
-    <!-- ⭐ Beautiful Enhanced Explanation Block ⭐ -->
-    <div style="
-      max-width:750px;
-      margin:0 auto 25px;
-      padding:16px 20px;
-      background:#f0f4ff;
-      border-left:5px solid #0b5cff;
-      border-radius:10px;
-      color:#333;
-      font-size:15px;
-      line-height:1.7;
-      text-align:center;
-      box-shadow:0 4px 12px rgba(0,0,0,0.05);
-    ">
-      <h2 style="margin-top:0; color:#0b5cff; font-size:20px;">
-        ⭐ What This Tool Does
-      </h2>
-
+    <div style="max-width:750px;margin:0 auto 25px;padding:16px 20px;background:#f0f4ff;border-left:5px solid #0b5cff;border-radius:10px;color:#333;font-size:15px;line-height:1.7;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+      <h2 style="margin-top:0; color:#0b5cff; font-size:20px;">⭐ Multi-Format Converter</h2>
       <p style="margin:0; padding:0 5px;">
-        This powerful and free <strong>online image converter</strong> allows you to instantly convert
-        pictures between <strong>PNG, JPG, and WEBP</strong> formats. You can easily
-        <strong>upload, resize, compress, optimize</strong>, and download your images with just one click.
-        All processing happens locally in your browser — no uploads, no servers, 100% private.
+        Instantly convert pictures between <strong>PNG, JPG, WEBP, and PDF</strong>.
+        Everything happens locally in your browser for <strong>100% privacy</strong>.
       </p>
-
-      <ul style="
-        list-style:none;
-        padding:0;
-        margin:12px 0 0;
-        text-align:center;
-        font-size:14px;
-        color:#444;
-      ">
-        <li>✨ Convert formats: PNG ↔ JPG ↔ WEBP</li>
-        <li>✨ Adjust quality for smaller file sizes</li>
-        <li>✨ Resize images while keeping aspect ratio</li>
-        <li>✨ Fast, secure, offline image processing</li>
-      </ul>
     </div>
-    <!-- ⭐ END Explanation Block ⭐ -->
 
     <div class="row">
       <div class="left">
         <div id="dropZone" class="drop">
           Drag & Drop or click to choose file<br>
-          <small class="small" id="supported-text">Supports PNG / JPEG / WEBP (animated GIFs converted to static images)</small>
+          <small class="small">Supports PNG / JPEG / WEBP / PDF Export</small>
           <input id="fileInput" type="file" accept="image/*" style="display:none">
         </div>
 
         <div class="controls">
           <div>
-            <label for="toFormat" id="format-label">Convert to</label>
+            <label for="toFormat">Convert to</label>
             <select id="toFormat">
               <option value="image/png">PNG</option>
               <option value="image/jpeg">JPEG</option>
               <option value="image/webp">WEBP</option>
+              <option value="application/pdf">PDF (Document)</option>
             </select>
           </div>
 
           <div>
-            <label for="qualityRange" id="quality-label">Quality (JPEG/WEBP) <span id="qLabel">90%</span></label>
+            <label for="qualityRange">Quality <span id="qLabel">90%</span></label>
             <input id="qualityRange" type="range" min="0.1" max="1" step="0.05" value="0.9">
           </div>
 
           <div>
-            <label for="widthInput" id="width-label">Width (px) — 0 to keep original</label>
+            <label for="widthInput">Width (px)</label>
             <input id="widthInput" type="number" min="0" value="0">
           </div>
 
           <div>
-            <label for="heightInput" id="height-label">Height (px) — 0 to keep original</label>
+            <label for="heightInput">Height (px)</label>
             <input id="heightInput" type="number" min="0" value="0">
           </div>
 
-          <div style="align-self:end">
-            <label><input id="keepAspect" type="checkbox" checked> Maintain aspect ratio</label>
+          <div style="align-self:end; padding-bottom: 5px;">
+            <label style="cursor:pointer"><input id="keepAspect" type="checkbox" checked> Maintain aspect ratio</label>
           </div>
 
-          <div style="align-self:end">
+          <div style="grid-column: 1 / -1; margin-top: 5px;">
             <button id="convertBtn" class="btn" disabled>⬇ Convert & Download</button>
           </div>
         </div>
 
-        <p class="small" id="note-text">Processing happens locally in your browser — image is not uploaded anywhere.</p>
+        <p class="small" style="text-align: center;">No image is uploaded — processing is offline.</p>
 
-        <div class="link-row" id="links-row">
+        <div class="link-row">
           <a href="./index.html" style="text-decoration:none;color:#0b5cff">🏠 Home</a> &nbsp; | &nbsp;
           <a href="./privacy.html" target="_blank" style="text-decoration:none;color:#0b5cff">Privacy Policy</a>
         </div>
       </div>
 
       <div>
-        <div id="previewArea" class="preview"></div>
-        <div id="meta" class="small" style="text-align:left"></div>
+        <div id="previewArea" class="preview">
+             <p style="text-align:center;color:#ccc;margin-top:50px">Preview</p>
+        </div>
+        <div id="meta" class="small" style="text-align:center"></div>
       </div>
     </div>
 
@@ -160,6 +133,8 @@ let image = new Image();
 let originalName = '';
 let aspect = 1;
 
+const { jsPDF } = window.jspdf;
+
 dropZone.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', (e) => { if (e.target.files && e.target.files[0]) loadFile(e.target.files[0]); });
 
@@ -177,12 +152,11 @@ function loadFile(file){
       aspect = image.width / image.height;
       previewArea.innerHTML = '';
       image.style.maxWidth = '100%';
-      image.style.borderRadius = '8px';
       previewArea.appendChild(image);
-      meta.innerHTML = `Name: <strong>${originalName}</strong> — Dimensions: <strong>${image.width}×${image.height}</strong> — Type: <strong>${file.type || 'Unknown'}</strong>`;
+      meta.innerHTML = `Original: <strong>${image.width}×${image.height}</strong> px`;
       convertBtn.disabled = false;
-      if(parseInt(widthInput.value) === 0) widthInput.value = image.width;
-      if(parseInt(heightInput.value) === 0) heightInput.value = image.height;
+      widthInput.value = image.width;
+      heightInput.value = image.height;
     };
     image.src = ev.target.result;
   };
@@ -205,37 +179,37 @@ heightInput.addEventListener('input', ()=> {
 });
 
 convertBtn.addEventListener('click', ()=> {
-  if(!image.src) return alert("No image loaded");
+  if(!image.src) return;
   const targetMime = toFormat.value;
   const q = parseFloat(qualityRange.value);
   let w = parseInt(widthInput.value) || image.width;
   let h = parseInt(heightInput.value) || image.height;
-  if(!w || !h){ w = image.width; h = image.height; }
 
   canvas.width = w; canvas.height = h;
   ctx.clearRect(0,0,w,h);
   ctx.drawImage(image,0,0,w,h);
 
-  canvas.toBlob((blob)=>{
-    if(!blob) return alert('Failed to create file');
-    const ext = mimeToExt(targetMime);
-    const fileName = `${originalName || 'image'}-converted.${ext}`;
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    URL.revokeObjectURL(link.href);
-    link.remove();
-  }, targetMime, q);
+  if (targetMime === 'application/pdf') {
+    const orientation = w > h ? 'l' : 'p';
+    const pdf = new jsPDF({
+      orientation: orientation,
+      unit: 'px',
+      format: [w, h]
+    });
+    const imgData = canvas.toDataURL('image/jpeg', q);
+    pdf.addImage(imgData, 'JPEG', 0, 0, w, h);
+    pdf.save(`${originalName}.pdf`);
+  } else {
+    canvas.toBlob((blob)=>{
+      const ext = targetMime.split('/')[1];
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${originalName}-converted.${ext}`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }, targetMime, q);
+  }
 });
-
-function mimeToExt(mime){
-  if(mime==='image/png') return 'png';
-  if(mime==='image/jpeg') return 'jpg';
-  if(mime==='image/webp') return 'webp';
-  return 'png';
-}
 
 ['dragenter','dragover','dragleave','drop'].forEach(evt=>window.addEventListener(evt,e=>e.preventDefault()));
 </script>
